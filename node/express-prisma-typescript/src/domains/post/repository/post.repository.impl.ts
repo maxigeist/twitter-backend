@@ -6,7 +6,8 @@ import { PostRepository } from '.'
 import { CreatePostInputDTO, PostDTO } from '../dto'
 
 export class PostRepositoryImpl implements PostRepository {
-  constructor (private readonly db: PrismaClient) {}
+  constructor (private readonly db: PrismaClient) {
+  }
 
   async create (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     const post = await this.db.post.create({
@@ -18,7 +19,7 @@ export class PostRepositoryImpl implements PostRepository {
     return new PostDTO(post)
   }
 
-  async getAllByDatePaginated (options: CursorPagination): Promise<PostDTO[]> {
+  async getAllByDatePaginated (options: CursorPagination, authorId?: string): Promise<PostDTO[]> {
     const posts = await this.db.post.findMany({
       cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
@@ -58,6 +59,60 @@ export class PostRepositoryImpl implements PostRepository {
         authorId
       }
     })
+    return posts.map(post => new PostDTO(post))
+  }
+
+  async getPostFromFollowedOrPublic (currentUserId: string, options: CursorPagination): Promise<PostDTO[]> {
+    const follows = await this.db.follow.findMany({
+      where: {
+        followerId: currentUserId
+      },
+      select: {
+        followedId: true
+      }
+    })
+    const followedUserIds = follows.map(follow => follow.followedId)
+    const posts = await this.db.post.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                author: {
+                  profileVisibility: {
+                    type: {
+                      type: 'public'
+                    }
+                  }
+                }
+              },
+              {
+                NOT: {
+                  authorId: currentUserId
+                }
+              }
+            ]
+          },
+          {
+            authorId: {
+              in: followedUserIds
+            }
+          }
+        ]
+      },
+      cursor: options.after ? { id: options.after } : (options.before) ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      orderBy: [
+        {
+          createdAt: 'desc'
+        },
+        {
+          id: 'asc'
+        }
+      ]
+    })
+    // Map posts to PostDTO
     return posts.map(post => new PostDTO(post))
   }
 }

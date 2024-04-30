@@ -28,9 +28,10 @@ model User {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime? // Optional value
 
-  posts     Post[]
-  follows   Follow[] @relation(name: "follows")
-  followers Follow[] @relation(name: "followers")
+  posts             Post[]
+  follows           Follow[]           @relation(name: "follows")
+  followers         Follow[]           @relation(name: "followers")
+  profileVisibility ProfileVisibility?
 }
 
 model Follow {
@@ -59,4 +60,20 @@ model Post {
   deletedAt DateTime? // Optional value
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
+}
+
+model ProfileVisibility {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  userId        String @unique @db.Uuid()
+  profileTypeId String @unique @db.Uuid()
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type ProfileType @relation(fields: [profileTypeId], references: [id], onDelete: Cascade)
+}
+
+model ProfileType {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  type              String
+  profileVisibility ProfileVisibility?
 }
