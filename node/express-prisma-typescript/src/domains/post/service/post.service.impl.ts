@@ -23,8 +23,11 @@ export class PostServiceImpl implements PostService {
   async getPost (userId: string, postId: string): Promise<PostDTO> {
     // TODO: validate that the author has public profile or the user follows the author
     const post = await this.repository.getById(postId)
-    if (!post) throw new NotFoundException('post')
-    return post
+    if (post) {
+      await this.checkAccessToPost(userId, post.authorId)
+      return post
+    }
+    throw new NotFoundException('post')
   }
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
@@ -35,6 +38,18 @@ export class PostServiceImpl implements PostService {
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<PostDTO[]> {
     // TODO: throw exception when the author has a private profile and the user doesn't follow them
-    return await this.repository.getByAuthorId(authorId)
+    const posts = await this.repository.getByAuthorId(authorId)
+    if (posts.length > 0) {
+      await this.checkAccessToPost(userId, authorId)
+      return posts
+    }
+    return []
+  }
+
+  async checkAccessToPost (userId: string, postAuthorId: string): Promise<boolean> {
+    if (await this.repository.userFollows(userId, postAuthorId) || !(await this.repository.userHasPrivateAccount(postAuthorId))) {
+      return true
+    }
+    throw new NotFoundException('post')
   }
 }

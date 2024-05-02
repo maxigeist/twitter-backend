@@ -1,5 +1,5 @@
 import { FollowRepository } from '@domains/follow/repository/follow.repository'
-import {Follow, PrismaClient} from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import { ExtendedFollowDto, FollowDTO } from '@domains/follow/dto'
 
 export class FollowRepositoryImpl implements FollowRepository {
