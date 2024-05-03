@@ -4,6 +4,7 @@ import { PostService } from '.'
 import { validate } from 'class-validator'
 import { ForbiddenException, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
+import * as console from 'node:console'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {}
@@ -50,6 +51,14 @@ export class PostServiceImpl implements PostService {
     if (await this.repository.userFollows(userId, postAuthorId) || !(await this.repository.userHasPrivateAccount(postAuthorId))) {
       return true
     }
-    throw new NotFoundException('post')
+    throw new ForbiddenException()
+  }
+
+  async getById (postId: string): Promise<PostDTO | null> {
+    return await this.repository.getById(postId)
+  }
+
+  async getPostAuthorId (postId: string): Promise<string> {
+    return await this.repository.getAuthorIdByPostId(postId)
   }
 }

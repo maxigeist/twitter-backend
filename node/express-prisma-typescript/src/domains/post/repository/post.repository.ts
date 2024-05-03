@@ -7,6 +7,7 @@ export interface PostRepository {
   delete: (postId: string) => Promise<void>
   getById: (postId: string) => Promise<PostDTO | null>
   getByAuthorId: (authorId: string) => Promise<PostDTO[]>
+  getAuthorIdByPostId: (postId: string) => Promise<string>
   getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination) => Promise<PostDTO[]>
   userFollows: (currentUserId: string, authorId: string) => Promise<boolean>
   userHasPrivateAccount: (authorId: string) => Promise<boolean>

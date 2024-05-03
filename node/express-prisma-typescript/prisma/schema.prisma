@@ -32,6 +32,7 @@ model User {
   follows           Follow[]           @relation(name: "follows")
   followers         Follow[]           @relation(name: "followers")
   profileVisibility ProfileVisibility?
+  reactions         Reaction[]
 }
 
 model Follow {
@@ -55,9 +56,10 @@ model Post {
   content  String   @db.VarChar(240) // Limit the content to 240 characters
   images   String[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   deletedAt DateTime? // Optional value
+  reactions Reaction[]
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade) // One to many
 }
@@ -76,4 +78,26 @@ model ProfileType {
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
   type              String
   profileVisibility ProfileVisibility?
+}
+
+model Reaction {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  userId         String @db.Uuid()
+  reactionTypeId String @db.Uuid()
+  postId         String @db.Uuid()
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Optional value
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type ReactionType @relation(fields: [reactionTypeId], references: [id], onDelete: Cascade)
+  post Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model ReactionType {
+  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  type     String
+  reaction Reaction[]
 }
