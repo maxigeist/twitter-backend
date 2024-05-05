@@ -4,10 +4,10 @@ import { PostService } from '.'
 import { validate } from 'class-validator'
 import { ForbiddenException, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
-import * as console from 'node:console'
 
 export class PostServiceImpl implements PostService {
-  constructor (private readonly repository: PostRepository) {}
+  constructor (private readonly repository: PostRepository) {
+  }
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -48,7 +48,10 @@ export class PostServiceImpl implements PostService {
   }
 
   async checkAccessToPost (userId: string, postAuthorId: string): Promise<boolean> {
-    if (await this.repository.userFollows(userId, postAuthorId) || !(await this.repository.userHasPrivateAccount(postAuthorId))) {
+    if (
+      (await this.repository.userFollows(userId, postAuthorId)) ||
+      !(await this.repository.userHasPrivateAccount(postAuthorId))
+    ) {
       return true
     }
     throw new ForbiddenException()

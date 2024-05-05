@@ -1,37 +1,37 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator'
 
 export class ReactionDto {
-  constructor(reaction: ReactionDto) {
-    this.userId = reaction.userId;
-    this.reactionTypeId = reaction.reactionTypeId;
-    this.postId = reaction.postId;
+  constructor (reaction: ReactionDto) {
+    this.userId = reaction.userId
+    this.reactionTypeId = reaction.reactionTypeId
+    this.postId = reaction.postId
   }
 
   @IsString()
   @IsNotEmpty()
-  userId: string;
+    userId: string
 
   @IsString()
   @IsNotEmpty()
-  reactionTypeId: string;
+    reactionTypeId: string
 
   @IsString()
   @IsNotEmpty()
-  postId: string;
+    postId: string
 }
 
 export class ExtendedReactionDto {
-  constructor(reaction: ExtendedReactionDto) {
-    this.userId = reaction.userId;
-    this.reactionTypeId = reaction.reactionTypeId;
-    this.postId = reaction.postId;
-    this.createdAt = reaction.createdAt;
-    this.id = reaction.id;
+  constructor (reaction: ExtendedReactionDto) {
+    this.userId = reaction.userId
+    this.reactionTypeId = reaction.reactionTypeId
+    this.postId = reaction.postId
+    this.createdAt = reaction.createdAt
+    this.id = reaction.id
   }
 
-  userId: string;
-  reactionTypeId: string;
-  postId: string;
-  createdAt: Date;
-  id: string;
+  userId: string
+  reactionTypeId: string
+  postId: string
+  createdAt: Date
+  id: string
 }

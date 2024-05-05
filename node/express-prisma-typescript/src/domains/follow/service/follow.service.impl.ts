@@ -5,6 +5,7 @@ import { ValidationException } from '@utils'
 
 export class FollowServiceImpl implements FollowService {
   constructor (private readonly followRepository: FollowRepository) {}
+
   async createFollow (followerId: string, followedId: string): Promise<ExtendedFollowDto> {
     const follow = { followerId, followedId }
     if (followerId !== followedId) {

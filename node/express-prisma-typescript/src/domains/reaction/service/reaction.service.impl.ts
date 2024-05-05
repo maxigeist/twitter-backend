@@ -4,7 +4,7 @@ import { ReactionRepository } from '@domains/reaction/repository/reaction.reposi
 import { PostServiceImpl } from '@domains/post/service'
 import { PostRepositoryImpl } from '@domains/post/repository'
 import { db, NotFoundException } from '@utils'
-import { reactionRouter } from '@domains/reaction/controller/reaction.controller';
+import { reactionRouter } from '@domains/reaction/controller/reaction.controller'
 
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly reactionRepository: ReactionRepository) {
@@ -12,7 +12,8 @@ export class ReactionServiceImpl implements ReactionService {
 
   postService: PostServiceImpl = new PostServiceImpl(new PostRepositoryImpl(db))
 
-  async createReaction (userId: string, reactionTypeId: string, postId: string): Promise<ExtendedReactionDto> {
+  async createReaction (userId: string, reactionType: string, postId: string): Promise<ExtendedReactionDto> {
+    const reactionTypeId = await this.reactionRepository.getReactionTypeId(reactionType) as string
     const reaction = { userId, reactionTypeId, postId }
     if (await this.postService.getById(postId)) {
       const reactionFromDB = await this.reactionRepository.checkIfReactionExists(reactionTypeId)

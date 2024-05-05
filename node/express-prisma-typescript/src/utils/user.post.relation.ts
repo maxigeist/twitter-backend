@@ -10,13 +10,13 @@ async function userFollows (currentUserId: string, authorId: string): Promise<bo
         followedId: authorId
       },
       select: {
-        id: true,
-      },
+        id: true
+      }
     })
-    .then((id) => !!id);
+    .then((id) => !!id)
 }
 
-export async function getPostAuthorId(postId: string): Promise<string> {
+export async function getPostAuthorId (postId: string): Promise<string> {
   const post = await db.post.findFirst({
     where: {
       id: postId
