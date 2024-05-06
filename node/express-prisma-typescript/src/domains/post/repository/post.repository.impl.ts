@@ -14,7 +14,6 @@ export class PostRepositoryImpl implements PostRepository {
       data: {
         authorId: userId,
         relatedPost: '',
-        isComment: false,
         ...data
       }
     })
@@ -25,7 +24,6 @@ export class PostRepositoryImpl implements PostRepository {
     const comment = await this.db.post.create({
       data: {
         authorId: userId,
-        isComment: true,
         relatedPost: postId,
         ...data
       }
@@ -135,13 +133,17 @@ export class PostRepositoryImpl implements PostRepository {
                 NOT: {
                   authorId: currentUserId
                 }
+              },
+              {
+                relatedPost: ''
               }
             ]
           },
           {
             authorId: {
               in: followedUserIds
-            }
+            },
+            relatedPost: ''
           }
         ]
       },
@@ -174,8 +176,10 @@ export class PostRepositoryImpl implements PostRepository {
   async getCommentsByAuthorId (authorId: string): Promise<CommentDTO[]> {
     const comments = await this.db.post.findMany({
       where: {
-        isComment: true,
-        authorId
+        authorId,
+        relatedPost: {
+          not: ''
+        }
       }
     })
     return comments.map((comment) => new CommentDTO(comment))

@@ -21,7 +21,6 @@ export class PostDTO {
     this.content = post.content
     this.images = post.images
     this.createdAt = post.createdAt
-    this.isComment = false
   }
 
   id: string
@@ -29,7 +28,6 @@ export class PostDTO {
   content: string
   images: string[]
   createdAt: Date
-  isComment: boolean
 }
 
 export class ExtendedPostDTO extends PostDTO {
