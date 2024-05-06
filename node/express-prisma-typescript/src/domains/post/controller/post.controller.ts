@@ -7,7 +7,7 @@ import { db, BodyValidation } from '@utils'
 
 import { PostRepositoryImpl } from '../repository'
 import { PostService, PostServiceImpl } from '../service'
-import { CreatePostInputDTO } from '../dto'
+import { CreateCommentInputDTO, CreatePostInputDTO } from '../dto'
 
 export const postRouter = Router()
 
@@ -48,6 +48,16 @@ postRouter.post('/', BodyValidation(CreatePostInputDTO), async (req: Request, re
   const post = await service.createPost(userId, data)
 
   return res.status(HttpStatus.CREATED).json(post)
+})
+
+postRouter.post('/comment/:postId', BodyValidation(CreateCommentInputDTO), async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const data = req.body
+  const { postId: relatedPostId } = req.params
+
+  const comment = await service.createComment(userId, data, relatedPostId)
+
+  return res.status(HttpStatus.CREATED).json(comment)
 })
 
 postRouter.delete('/:postId', async (req: Request, res: Response) => {

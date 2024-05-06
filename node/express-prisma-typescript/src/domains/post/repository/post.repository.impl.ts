@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreateCommentInputDTO, CreatePostInputDTO, PostDTO } from '../dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -12,10 +12,24 @@ export class PostRepositoryImpl implements PostRepository {
     const post = await this.db.post.create({
       data: {
         authorId: userId,
+        relatedPost: '',
+        isComment: false,
         ...data
       }
     })
     return new PostDTO(post)
+  }
+
+  async createComment (userId: string, data: CreateCommentInputDTO, postId: string): Promise<CommentDTO> {
+    const comment = await this.db.post.create({
+      data: {
+        authorId: userId,
+        isComment: true,
+        relatedPost: postId,
+        ...data
+      }
+    })
+    return new CommentDTO(comment)
   }
 
   async getAllByDatePaginated (options: CursorPagination, authorId?: string): Promise<PostDTO[]> {
