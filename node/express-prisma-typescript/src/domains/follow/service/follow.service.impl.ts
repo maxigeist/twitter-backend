@@ -17,4 +17,8 @@ export class FollowServiceImpl implements FollowService {
   async deleteFollow (followerId: string, followedId: string): Promise<void> {
     await this.followRepository.delete(followerId, followedId)
   }
+
+  async getUserFollowedId (followerId: string): Promise<string[]> {
+    return await this.followRepository.getUserFollowedId(followerId)
+  }
 }

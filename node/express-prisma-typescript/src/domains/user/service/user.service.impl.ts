@@ -1,21 +1,36 @@
 import { NotFoundException } from '@utils/errors'
 import { OffsetPagination } from 'types'
-import { UserDTO } from '../dto'
+import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
 
+import { FollowService, FollowServiceImpl } from '@domains/follow/service'
+import { FollowRepositoryImpl } from '@domains/follow/repository'
+import { db } from '@utils'
+
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
+  followService: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
 
-  async getUser (userId: any): Promise<UserDTO> {
+  async getUser (userId: any): Promise<UserViewDTO> {
     const user = await this.repository.getById(userId)
     if (!user) throw new NotFoundException('user')
     return user
   }
 
-  async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserDTO[]> {
+  async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
     // TODO: make this return only users followed by users the original user follows
-    return await this.repository.getRecommendedUsersPaginated(options)
+    const usersFollowedId = await this.followService.getUserFollowedId(userId)
+    const userFollowedFollowedId: string[] = []
+    for (const userFollowedId of usersFollowedId) {
+      const userFollowedFollowedIdAux = await this.followService.getUserFollowedId(userFollowedId)
+      for (const userFollowedIdBis of userFollowedFollowedIdAux) {
+        if (!usersFollowedId.includes(userFollowedIdBis) && userFollowedIdBis !== userId) {
+          userFollowedFollowedId.push(userFollowedIdBis)
+        }
+      }
+    }
+    return await this.repository.getRecommendedUsersPaginated(userFollowedFollowedId, options)
   }
 
   async deleteUser (userId: any): Promise<void> {
