@@ -21,6 +21,16 @@ export class FollowRepositoryImpl implements FollowRepository {
     })
   }
 
+  async getFollow (followerId: string, followedId: string): Promise<ExtendedFollowDto | null> {
+    const follow = await this.db.follow.findFirst({
+      where: {
+        followerId,
+        followedId
+      }
+    })
+    return follow ? new ExtendedFollowDto(follow) : null
+  }
+
   async getUserFollowedId (followerId: string): Promise<string[]> {
     const followedID = await this.db.follow.findMany({
       where: {

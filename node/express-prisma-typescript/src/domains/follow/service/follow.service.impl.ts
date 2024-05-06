@@ -8,10 +8,15 @@ export class FollowServiceImpl implements FollowService {
 
   async createFollow (followerId: string, followedId: string): Promise<ExtendedFollowDto> {
     const follow = { followerId, followedId }
-    if (followerId !== followedId) {
-      return await this.followRepository.create(new FollowDTO(follow))
+    const checkFollow = await this.followRepository.getFollow(followerId, followedId)
+    if (!checkFollow) {
+      if (followerId !== followedId) {
+        return await this.followRepository.create(new FollowDTO(follow))
+      }
+      throw new ValidationException([{ message: "A user can't follow himself" }])
     }
-    throw new ValidationException([{ message: "A user can't follow himself" }])
+    await this.deleteFollow(followerId, followedId)
+    return checkFollow
   }
 
   async deleteFollow (followerId: string, followedId: string): Promise<void> {

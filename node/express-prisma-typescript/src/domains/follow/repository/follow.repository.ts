@@ -6,4 +6,6 @@ export interface FollowRepository {
   delete: (followerId: string, followedId: string) => Promise<void>
 
   getUserFollowedId: (followerId: string) => Promise<string[]>
+
+  getFollow: (followerId: string, followedId: string) => Promise< ExtendedFollowDto | null>
 }
