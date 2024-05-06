@@ -13,16 +13,6 @@ export class CreatePostInputDTO {
 }
 
 // They could use the same but it makes no sense because the comment may have a longer length
-export class CreateCommentInputDTO {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(240)
-    content!: string
-
-  @IsOptional()
-  @MaxLength(4)
-    images?: string[]
-}
 
 export class PostDTO {
   constructor (post: PostDTO) {
@@ -42,23 +32,6 @@ export class PostDTO {
   isComment: boolean
 }
 
-export class CommentDTO {
-  constructor (comment: CommentDTO) {
-    this.id = comment.id
-    this.authorId = comment.authorId
-    this.content = comment.content
-    this.images = comment.images
-    this.createdAt = comment.createdAt
-    this.isComment = true
-  }
-
-  id: string
-  authorId: string
-  content: string
-  images: string[]
-  createdAt: Date
-  isComment: boolean
-}
 export class ExtendedPostDTO extends PostDTO {
   constructor (post: ExtendedPostDTO) {
     super(post)

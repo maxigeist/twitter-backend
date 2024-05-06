@@ -1,5 +1,6 @@
 import { CursorPagination } from '@types'
-import { CommentDTO, CreateCommentInputDTO, CreatePostInputDTO, PostDTO } from '../dto'
+import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 
 export interface PostRepository {
   create: (userId: string, data: CreatePostInputDTO) => Promise<PostDTO>
@@ -12,4 +13,5 @@ export interface PostRepository {
   getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination) => Promise<PostDTO[]>
   userFollows: (currentUserId: string, authorId: string) => Promise<boolean>
   userHasPrivateAccount: (authorId: string) => Promise<boolean>
+  getCommentsByAuthorId: (authorId: string) => Promise<CommentDTO[]>
 }

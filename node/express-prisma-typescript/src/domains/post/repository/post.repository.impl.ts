@@ -3,7 +3,8 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository } from '.'
-import { CommentDTO, CreateCommentInputDTO, CreatePostInputDTO, PostDTO } from '../dto'
+import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 
 export class PostRepositoryImpl implements PostRepository {
   constructor (private readonly db: PrismaClient) {}
@@ -156,7 +157,6 @@ export class PostRepositoryImpl implements PostRepository {
         }
       ]
     })
-    // Map posts to PostDTO
     return posts.map((post) => new PostDTO(post))
   }
 
@@ -169,5 +169,15 @@ export class PostRepositoryImpl implements PostRepository {
         authorId: true
       }
     }).then((post) => post?.authorId ?? '')
+  }
+
+  async getCommentsByAuthorId (authorId: string): Promise<CommentDTO[]> {
+    const comments = await this.db.post.findMany({
+      where: {
+        isComment: true,
+        authorId
+      }
+    })
+    return comments.map((comment) => new CommentDTO(comment))
   }
 }

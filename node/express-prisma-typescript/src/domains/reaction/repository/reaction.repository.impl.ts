@@ -46,4 +46,28 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     })
     return (reactions.length > 0) ? new ExtendedReactionDto(reactions[0]) : null
   }
+
+  async getLikesFromUser (userId: string): Promise<ExtendedReactionDto[]> {
+    const likes = await this.db.reaction.findMany({
+      where: {
+        userId,
+        type: {
+          type: 'like'
+        }
+      }
+    })
+    return likes.map((like) => new ExtendedReactionDto(like))
+  }
+
+  async getRetweetsFromUser (userId: string): Promise<ExtendedReactionDto[]> {
+    const retweets = await this.db.reaction.findMany({
+      where: {
+        userId,
+        type: {
+          type: 'retweet'
+        }
+      }
+    })
+    return retweets.map((retweet) => new ExtendedReactionDto(retweet))
+  }
 }

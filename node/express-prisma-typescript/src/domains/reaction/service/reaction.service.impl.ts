@@ -4,7 +4,6 @@ import { ReactionRepository } from '@domains/reaction/repository/reaction.reposi
 import { PostServiceImpl } from '@domains/post/service'
 import { PostRepositoryImpl } from '@domains/post/repository'
 import { db, NotFoundException } from '@utils'
-import { reactionRouter } from '@domains/reaction/controller/reaction.controller'
 
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly reactionRepository: ReactionRepository) {
@@ -36,5 +35,15 @@ export class ReactionServiceImpl implements ReactionService {
     } else {
       throw new NotFoundException('reaction')
     }
+  }
+
+  async getLikesFromUser (userId: string, authorId: string): Promise<ExtendedReactionDto[]> {
+    await this.postService.checkAccessToPost(userId, authorId)
+    return await this.reactionRepository.getLikesFromUser(authorId)
+  }
+
+  async getRetweetsFromUser (userId: string, authorId: string): Promise<ExtendedReactionDto[]> {
+    await this.postService.checkAccessToPost(userId, authorId)
+    return await this.reactionRepository.getRetweetsFromUser(authorId)
   }
 }
