@@ -1,5 +1,5 @@
 import { NotFoundException } from '@utils/errors'
-import { OffsetPagination } from 'types'
+import { CursorPagination, OffsetPagination } from 'types'
 import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
 import { UserService } from './user.service'
@@ -35,5 +35,9 @@ export class UserServiceImpl implements UserService {
 
   async deleteUser (userId: any): Promise<void> {
     await this.repository.delete(userId)
+  }
+
+  async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
+    return await this.repository.getUsersByUsername(username, options)
   }
 }
