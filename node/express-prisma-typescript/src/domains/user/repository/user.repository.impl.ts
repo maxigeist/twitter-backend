@@ -66,21 +66,13 @@ export class UserRepositoryImpl implements UserRepository {
 
   async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
     const users = await this.db.user.findMany({
-      take: options.limit ? options.limit : undefined,
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
       where: {
-        AND: [
-          {
-            username: {
-              startsWith: username
-            }
-          },
-          {
-            id: {
-              gt: options.after,
-              lt: options.before
-            }
-          }
-        ]
+        username: {
+          startsWith: username
+        }
       },
       orderBy: [
         {

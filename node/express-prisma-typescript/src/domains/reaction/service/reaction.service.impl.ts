@@ -15,7 +15,7 @@ export class ReactionServiceImpl implements ReactionService {
     const reactionTypeId = await this.reactionRepository.getReactionTypeId(reactionType) as string
     const reaction = { userId, reactionTypeId, postId }
     if (await this.postService.getById(postId)) {
-      const reactionFromDB = await this.reactionRepository.checkIfReactionExists(reactionTypeId)
+      const reactionFromDB = await this.reactionRepository.checkIfReactionExists(userId, reactionTypeId, postId)
       if (!reactionFromDB) {
         const authorId = await this.postService.getPostAuthorId(postId)
         if (await this.postService.checkAccessToPost(userId, authorId)) {

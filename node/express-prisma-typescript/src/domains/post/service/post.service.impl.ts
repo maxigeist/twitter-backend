@@ -1,14 +1,18 @@
-import { CreatePostInputDTO, PostDTO } from '../dto'
-import { PostRepository } from '../repository'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
+import { PostRepository, PostWithReactionsAndAuthor } from '../repository'
 import { PostService } from '.'
 import { validate } from 'class-validator'
-import { ForbiddenException, NotFoundException } from '@utils'
+import { db, ForbiddenException, NotFoundException } from '@utils'
 import { CursorPagination } from '@types'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
+import { FollowServiceImpl } from '@domains/follow/service'
+import { FollowRepositoryImpl } from '@domains/follow/repository'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {
   }
+
+  followService: FollowServiceImpl = new FollowServiceImpl(new FollowRepositoryImpl(db))
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -45,7 +49,9 @@ export class PostServiceImpl implements PostService {
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<PostDTO[]> {
     // TODO: filter post search to return posts from authors that the user follows
-    return await this.repository.getPostFromFollowedOrPublic(userId, options)
+    const followedId = await this.followService.getUserFollowedId(userId)
+    // The related post is empty because if not it is a comment.
+    return await this.repository.getPostFromFollowedOrPublic(userId, options, followedId, '')
     // return await this.repository.getAllByDatePaginated(options)
   }
 
@@ -81,5 +87,35 @@ export class PostServiceImpl implements PostService {
   async getCommentsByUser (userId: string, authorId: string): Promise<CommentDTO[]> {
     await this.checkAccessToPost(userId, authorId)
     return await this.repository.getCommentsByAuthorId(authorId)
+  }
+
+  async getCommentsByPost (userId: string, options: CursorPagination, postId: string): Promise<ExtendedPostDTO[]> {
+    const post = await this.repository.getById(postId)
+    if (post) {
+      const followedId = await this.followService.getUserFollowedId(userId)
+      await this.checkAccessToPost(userId, post.authorId)
+      const comments = await this.repository.getCommentsFromPost(followedId, postId, options)
+      const extendedPostDTOS: ExtendedPostDTO[] = []
+      for (const comment of comments) {
+        const qtyComments = await this.repository.getCommentQty(comment.id)
+        const { qtyLikes, qtyRetweets } = this.countReactions(comment)
+        extendedPostDTOS.push({ id: comment.id, authorId: comment.authorId, content: comment.content, images: comment.images, createdAt: comment.createdAt, author: comment.author, qtyComments, qtyLikes, qtyRetweets })
+      }
+      return extendedPostDTOS
+    }
+    throw new NotFoundException('post')
+  }
+
+  countReactions (comment: PostWithReactionsAndAuthor): { qtyLikes: number, qtyRetweets: number } {
+    let qtyLikes = 0
+    let qtyRetweets = 0
+    for (const commentElement of comment.reactions) {
+      if (commentElement.type.type === 'like') {
+        qtyLikes++
+      } else if (commentElement.type.type === 'retweet') {
+        qtyRetweets++
+      }
+    }
+    return { qtyLikes, qtyRetweets }
   }
 }

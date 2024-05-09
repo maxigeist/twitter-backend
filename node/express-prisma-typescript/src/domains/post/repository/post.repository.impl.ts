@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 
 import { CursorPagination } from '@types'
 
-import { PostRepository } from '.'
+import { PostRepository, PostWithReactionsAndAuthor } from '.'
 import { CreatePostInputDTO, PostDTO } from '../dto'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 
@@ -105,16 +105,7 @@ export class PostRepositoryImpl implements PostRepository {
     return posts.map((post) => new PostDTO(post))
   }
 
-  async getPostFromFollowedOrPublic (currentUserId: string, options: CursorPagination): Promise<PostDTO[]> {
-    const follows = await this.db.follow.findMany({
-      where: {
-        followerId: currentUserId
-      },
-      select: {
-        followedId: true
-      }
-    })
-    const followedUserIds = follows.map((follow) => follow.followedId)
+  async getPostFromFollowedOrPublic (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string): Promise<PostDTO[]> {
     const posts = await this.db.post.findMany({
       where: {
         OR: [
@@ -135,7 +126,7 @@ export class PostRepositoryImpl implements PostRepository {
                 }
               },
               {
-                relatedPost: ''
+                relatedPost
               }
             ]
           },
@@ -143,7 +134,7 @@ export class PostRepositoryImpl implements PostRepository {
             authorId: {
               in: followedUserIds
             },
-            relatedPost: ''
+            relatedPost
           }
         ]
       },
@@ -160,6 +151,56 @@ export class PostRepositoryImpl implements PostRepository {
       ]
     })
     return posts.map((post) => new PostDTO(post))
+  }
+
+  async getCommentsFromPost (followedUserIds: string[], postId: string, options: CursorPagination): Promise<PostWithReactionsAndAuthor[]> {
+    const comments = await this.db.post.findMany({
+      where: {
+        OR: [
+          {
+            AND: [
+              {
+                author: {
+                  profileVisibility: {
+                    type: {
+                      type: 'public'
+                    }
+                  }
+                }
+              },
+              {
+                relatedPost: postId
+              }
+            ]
+          },
+          {
+            authorId: {
+              in: followedUserIds
+            },
+            relatedPost: postId
+          }
+        ]
+      },
+      include: {
+        reactions: {
+          select: {
+            type: true
+          }
+        },
+        author: true
+      },
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      orderBy: [
+        {
+          reactions: {
+            _count: 'desc'
+          }
+        }
+      ]
+    })
+    return comments
   }
 
   async getAuthorIdByPostId (postId: string): Promise<string> {
@@ -183,5 +224,14 @@ export class PostRepositoryImpl implements PostRepository {
       }
     })
     return comments.map((comment) => new CommentDTO(comment))
+  }
+
+  async getCommentQty (postId: string): Promise<number> {
+    const qtyComments = await this.db.post.count({
+      where: {
+        relatedPost: postId
+      }
+    })
+    return qtyComments
   }
 }

@@ -40,10 +40,8 @@ userRouter.get('/:userId', async (req: Request, res: Response) => {
 
 userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
   const { username } = req.params
-  const { limit } = req.query
-  const { before } = req.query
-  const { after } = req.query
-  const users = await service.getUsersByUsername(username, { limit: Number(limit), before: before as string, after: after as string })
+  const { limit, before, after } = req.query as Record<string, string>
+  const users = await service.getUsersByUsername(username, { limit: Number(limit), before, after })
   return res.status(HttpStatus.OK).json(users)
 })
 

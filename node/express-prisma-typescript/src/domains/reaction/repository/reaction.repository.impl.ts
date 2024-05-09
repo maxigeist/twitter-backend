@@ -38,10 +38,12 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     return reactionTypeId ? reactionTypeId.id : null
   }
 
-  async checkIfReactionExists (reactionTypeId: string): Promise<ExtendedReactionDto | null> {
+  async checkIfReactionExists (userId: string, reactionTypeId: string, postId: string): Promise<ExtendedReactionDto | null> {
     const reactions = await this.db.reaction.findMany({
       where: {
-        reactionTypeId
+        userId,
+        reactionTypeId,
+        postId
       }
     })
     return (reactions.length > 0) ? new ExtendedReactionDto(reactions[0]) : null

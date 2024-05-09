@@ -8,7 +8,7 @@ export interface ReactionRepository {
 
   getById: (reactionId: string) => Promise<ExtendedReactionDto | null>
 
-  checkIfReactionExists: (reactionTypeId: string) => Promise<ExtendedReactionDto | null>
+  checkIfReactionExists: (userId: string, reactionTypeId: string, postId: string) => Promise<ExtendedReactionDto | null>
 
   getReactionTypeId: (type: string) => Promise<string | null>
 
