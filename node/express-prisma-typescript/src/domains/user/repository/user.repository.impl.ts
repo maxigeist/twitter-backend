@@ -30,6 +30,19 @@ export class UserRepositoryImpl implements UserRepository {
     })
   }
 
+  async userHasPrivateAccount (userId: string): Promise<boolean> {
+    return await this.db.profileVisibility
+      .findFirst({
+        where: {
+          userId,
+          type: {
+            type: 'private'
+          }
+        }
+      })
+      .then((profile) => Boolean(profile))
+  }
+
   async getRecommendedUsersPaginated (userId: string[], options: OffsetPagination): Promise<UserViewDTO[]> {
     const users = await this.db.user.findMany({
       take: options.limit ? options.limit : undefined,

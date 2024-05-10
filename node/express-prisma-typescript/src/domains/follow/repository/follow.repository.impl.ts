@@ -42,4 +42,18 @@ export class FollowRepositoryImpl implements FollowRepository {
     })
     return followedID.map((followedId) => followedId.followedId)
   }
+
+  async userFollows (currentUserId: string, authorId: string): Promise<boolean> {
+    return await this.db.follow
+      .findFirst({
+        where: {
+          followerId: currentUserId,
+          followedId: authorId
+        },
+        select: {
+          id: true
+        }
+      })
+      .then((id) => !!id)
+  }
 }

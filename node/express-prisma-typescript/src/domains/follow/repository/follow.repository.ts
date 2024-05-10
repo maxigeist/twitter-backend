@@ -8,4 +8,6 @@ export interface FollowRepository {
   getUserFollowedId: (followerId: string) => Promise<string[]>
 
   getFollow: (followerId: string, followedId: string) => Promise< ExtendedFollowDto | null>
+
+  userFollows: (currentUserId: string, authorId: string) => Promise<boolean>
 }

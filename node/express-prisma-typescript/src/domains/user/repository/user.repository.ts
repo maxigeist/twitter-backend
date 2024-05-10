@@ -9,4 +9,5 @@ export interface UserRepository {
   getById: (userId: string) => Promise<UserViewDTO | null>
   getByEmailOrUsername: (email?: string, username?: string) => Promise<ExtendedUserDTO | null>
   getUsersByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
+  userHasPrivateAccount: (userId: string) => Promise<boolean>
 }
