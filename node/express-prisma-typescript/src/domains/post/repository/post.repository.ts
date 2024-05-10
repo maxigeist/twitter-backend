@@ -20,9 +20,9 @@ export interface PostRepository {
   getAllByDatePaginated: (options: CursorPagination) => Promise<PostDTO[]>
   delete: (postId: string) => Promise<void>
   getById: (postId: string) => Promise<PostDTO | null>
-  getByAuthorId: (authorId: string) => Promise<PostDTO[]>
+  getByAuthorId: (authorId: string) => Promise<PostWithReactionsAndAuthor[]>
   getAuthorIdByPostId: (postId: string) => Promise<string>
-  getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string) => Promise<PostDTO[]>
+  getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string) => Promise<PostWithReactionsAndAuthor[]>
   userFollows: (currentUserId: string, authorId: string) => Promise<boolean>
   userHasPrivateAccount: (authorId: string) => Promise<boolean>
   getCommentsByAuthorId: (authorId: string) => Promise<CommentDTO[]>

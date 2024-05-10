@@ -96,16 +96,25 @@ export class PostRepositoryImpl implements PostRepository {
   //   const authorId = await this.db.post.find
   // }
 
-  async getByAuthorId (authorId: string): Promise<PostDTO[]> {
+  async getByAuthorId (authorId: string): Promise<PostWithReactionsAndAuthor[]> {
     const posts = await this.db.post.findMany({
       where: {
-        authorId
+        authorId,
+        relatedPost: ''
+      },
+      include: {
+        reactions: {
+          select: {
+            type: true
+          }
+        },
+        author: true
       }
     })
-    return posts.map((post) => new PostDTO(post))
+    return posts
   }
 
-  async getPostFromFollowedOrPublic (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string): Promise<PostDTO[]> {
+  async getPostFromFollowedOrPublic (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string): Promise<PostWithReactionsAndAuthor[]> {
     const posts = await this.db.post.findMany({
       where: {
         OR: [
@@ -138,6 +147,14 @@ export class PostRepositoryImpl implements PostRepository {
           }
         ]
       },
+      include: {
+        reactions: {
+          select: {
+            type: true
+          }
+        },
+        author: true
+      },
       cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
       skip: options.after ?? options.before ? 1 : undefined,
       take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
@@ -150,7 +167,7 @@ export class PostRepositoryImpl implements PostRepository {
         }
       ]
     })
-    return posts.map((post) => new PostDTO(post))
+    return posts
   }
 
   async getCommentsFromPost (followedUserIds: string[], postId: string, options: CursorPagination): Promise<PostWithReactionsAndAuthor[]> {
