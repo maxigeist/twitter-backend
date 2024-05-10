@@ -23,8 +23,6 @@ export interface PostRepository {
   getByAuthorId: (authorId: string) => Promise<PostWithReactionsAndAuthor[]>
   getAuthorIdByPostId: (postId: string) => Promise<string>
   getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string) => Promise<PostWithReactionsAndAuthor[]>
-  userFollows: (currentUserId: string, authorId: string) => Promise<boolean>
-  userHasPrivateAccount: (authorId: string) => Promise<boolean>
   getCommentsByAuthorId: (authorId: string) => Promise<CommentDTO[]>
   getCommentsFromPost: (followedUserIds: string[], postId: string, options: CursorPagination) => Promise<PostWithReactionsAndAuthor[]>
   getCommentQty: (postId: string) => Promise<number>

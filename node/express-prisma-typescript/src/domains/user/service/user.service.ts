@@ -6,4 +6,5 @@ export interface UserService {
   getUser: (userId: string, otherUserId: any) => Promise<UserViewDTO>
   getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserViewDTO[]>
   getUsersByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
+  userHasPrivateAccount: (userId: string) => Promise<boolean>
 }

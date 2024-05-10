@@ -56,33 +56,6 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async userFollows (currentUserId: string, authorId: string): Promise<boolean> {
-    return await this.db.follow
-      .findFirst({
-        where: {
-          followerId: currentUserId,
-          followedId: authorId
-        },
-        select: {
-          id: true
-        }
-      })
-      .then((id) => !!id)
-  }
-
-  async userHasPrivateAccount (authorId: string): Promise<boolean> {
-    return await this.db.profileVisibility
-      .findFirst({
-        where: {
-          userId: authorId,
-          type: {
-            type: 'private'
-          }
-        }
-      })
-      .then((profile) => Boolean(profile))
-  }
-
   async getById (postId: string): Promise<PostDTO | null> {
     const post = await this.db.post.findUnique({
       where: {

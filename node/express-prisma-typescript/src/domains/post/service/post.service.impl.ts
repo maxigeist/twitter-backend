@@ -7,12 +7,15 @@ import { CursorPagination } from '@types'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 import { FollowServiceImpl } from '@domains/follow/service'
 import { FollowRepositoryImpl } from '@domains/follow/repository'
+import { UserServiceImpl } from '@domains/user/service'
+import { UserRepositoryImpl } from '@domains/user/repository'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {
   }
 
   followService: FollowServiceImpl = new FollowServiceImpl(new FollowRepositoryImpl(db))
+  userService: UserServiceImpl = new UserServiceImpl(new UserRepositoryImpl((db)))
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
@@ -80,8 +83,8 @@ export class PostServiceImpl implements PostService {
   async checkAccessToPost (userId: string, postAuthorId: string): Promise<boolean> {
     if (
       userId === postAuthorId ||
-      (await this.repository.userFollows(userId, postAuthorId)) ||
-      !(await this.repository.userHasPrivateAccount(postAuthorId))
+      (await this.followService.userFollows(userId, postAuthorId)) ||
+      !(await this.userService.userHasPrivateAccount(postAuthorId))
     ) {
       return true
     }

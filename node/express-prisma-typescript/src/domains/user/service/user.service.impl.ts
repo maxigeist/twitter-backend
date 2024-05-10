@@ -15,7 +15,7 @@ export class UserServiceImpl implements UserService {
   async getUser (userId: string, otherUserId: any): Promise<UserViewDTO> {
     const user = await this.repository.getById(otherUserId)
     if (user) {
-      if (!await this.repository.userHasPrivateAccount(otherUserId) || await this.followService.userFollows(userId, otherUserId)) {
+      if (!await this.userHasPrivateAccount(otherUserId) || await this.followService.userFollows(userId, otherUserId)) {
         return user
       }
       throw new ForbiddenException()
@@ -44,5 +44,9 @@ export class UserServiceImpl implements UserService {
 
   async getUsersByUsername (username: string, options: CursorPagination): Promise<UserViewDTO[]> {
     return await this.repository.getUsersByUsername(username, options)
+  }
+
+  async userHasPrivateAccount (userId: string): Promise<boolean> {
+    return await this.repository.userHasPrivateAccount(userId)
   }
 }
