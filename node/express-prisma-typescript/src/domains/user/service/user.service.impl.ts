@@ -49,4 +49,8 @@ export class UserServiceImpl implements UserService {
   async userHasPrivateAccount (userId: string): Promise<boolean> {
     return await this.repository.userHasPrivateAccount(userId)
   }
+
+  async getUserById (userId: string): Promise<UserViewDTO | null> {
+    return await this.repository.getById(userId)
+  }
 }

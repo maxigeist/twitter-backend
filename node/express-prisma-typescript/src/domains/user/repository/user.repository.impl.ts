@@ -9,7 +9,23 @@ export class UserRepositoryImpl implements UserRepository {
 
   async create (data: SignupInputDTO): Promise<UserDTO> {
     return await this.db.user.create({
-      data
+      data: {
+        ...data,
+        profileVisibility: {
+          create: {
+            type: {
+              connectOrCreate: {
+                where: {
+                  type: 'public'
+                },
+                create: {
+                  type: 'public'
+                }
+              }
+            }
+          }
+        }
+      }
     }).then(user => new UserDTO(user))
   }
 
@@ -94,5 +110,14 @@ export class UserRepositoryImpl implements UserRepository {
       ]
     })
     return users.map(user => new UserViewDTO(user))
+  }
+
+  async getUserById (userId: string): Promise<UserViewDTO | null> {
+    const user = await this.db.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+    return user ? new UserViewDTO(user) : null
   }
 }

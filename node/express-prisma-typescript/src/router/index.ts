@@ -8,6 +8,7 @@ import { healthRouter } from '@domains/health'
 import { followRouter } from '@domains/follow'
 import { commentRouter } from '@domains/comment'
 import { reactionRouter } from '@domains/reaction'
+import { conversationRouter } from '@domains/conversation'
 
 export const router = Router()
 
@@ -15,6 +16,7 @@ router.use('/health', healthRouter)
 router.use('/auth', authRouter)
 router.use('/user', withAuth, userRouter)
 router.use('/post', withAuth, postRouter)
-router.use('/follower', withAuth, followRouter)
+router.use('/follow', withAuth, followRouter)
 router.use('/reaction', withAuth, reactionRouter)
 router.use('/comment', withAuth, commentRouter)
+router.use('/conversation', withAuth, conversationRouter)
