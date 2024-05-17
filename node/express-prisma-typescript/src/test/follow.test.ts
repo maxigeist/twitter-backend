@@ -2,13 +2,13 @@
 import { FollowRepositoryImpl } from '../domains/follow/repository'
 import { FollowServiceImpl } from '../domains/follow/service'
 import { NotFoundException, ValidationException } from '../utils'
-import { getPrismaMock } from '../test/config'
+import { PrismaMock } from '../test/config'
 
 let user: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let user2: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let follow: { id: string, followerId: string, followedId: string, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let extendedFollow: { id: string, followerId: string, followedId: string, createdAt: Date }
-
+const prismaMock = new PrismaMock().prismaMock
 describe('Follow tests', () => {
   beforeAll(async () => {
     const date = new Date()
@@ -51,7 +51,6 @@ describe('Follow tests', () => {
   })
 
   test('should follow a user', async () => {
-    const prismaMock = await getPrismaMock()
     prismaMock.follow.findFirst.mockResolvedValue(null)
     prismaMock.follow.create.mockResolvedValue(follow)
 
@@ -61,7 +60,6 @@ describe('Follow tests', () => {
   })
 
   test('should not follow a user if the other userId does not exist', async () => {
-    const prismaMock = await getPrismaMock()
     prismaMock.follow.findFirst.mockResolvedValue(null)
     prismaMock.follow.create.mockRejectedValue(new Error('User not found'))
     const followRepositoryImpl = new FollowRepositoryImpl(prismaMock)
@@ -70,8 +68,6 @@ describe('Follow tests', () => {
   })
 
   test('should not follow a user if the userid are the same', async () => {
-    const prismaMock = await getPrismaMock()
-    console.log(prismaMock)
     prismaMock.follow.findFirst.mockResolvedValue(null)
     const followRepositoryImpl = new FollowRepositoryImpl(prismaMock)
     const followService = new FollowServiceImpl(followRepositoryImpl)

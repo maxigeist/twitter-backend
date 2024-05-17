@@ -1,6 +1,7 @@
 import { mockReset } from 'jest-mock-extended'
-import { getPrismaMock } from '../test/config'
+import PrismaMock from '../test/config'
 
 beforeEach(async () => {
-  mockReset(await getPrismaMock())
+  const prismaMockInstance = new PrismaMock()
+  mockReset(prismaMockInstance.prismaMock)
 })
