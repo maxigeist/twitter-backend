@@ -6,7 +6,7 @@ import { UserService } from './user.service'
 
 import { FollowService, FollowServiceImpl } from '@domains/follow/service'
 import { FollowRepositoryImpl } from '@domains/follow/repository'
-import { db } from '@utils'
+import { db } from '@utils/database'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
@@ -48,5 +48,13 @@ export class UserServiceImpl implements UserService {
 
   async userHasPrivateAccount (userId: string): Promise<boolean> {
     return await this.repository.userHasPrivateAccount(userId)
+  }
+
+  async getUserById (userId: string): Promise<UserViewDTO> {
+    const user = await this.repository.getById(userId)
+    if (user) {
+      return user
+    }
+    throw new NotFoundException('user')
   }
 }

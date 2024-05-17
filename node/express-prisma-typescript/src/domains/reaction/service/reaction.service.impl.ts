@@ -4,7 +4,6 @@ import { ReactionRepository } from '@domains/reaction/repository/reaction.reposi
 import { PostServiceImpl } from '@domains/post/service'
 import { PostRepositoryImpl } from '@domains/post/repository'
 import { db, NotFoundException } from '@utils'
-
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly reactionRepository: ReactionRepository) {
   }
@@ -13,6 +12,9 @@ export class ReactionServiceImpl implements ReactionService {
 
   async createReaction (userId: string, reactionType: string, postId: string): Promise<ExtendedReactionDto> {
     const reactionTypeId = await this.reactionRepository.getReactionTypeId(reactionType) as string
+    if (!reactionTypeId) {
+      throw new NotFoundException('reaction type')
+    }
     const reaction = { userId, reactionTypeId, postId }
     if (await this.postService.getById(postId)) {
       const reactionFromDB = await this.reactionRepository.checkIfReactionExists(userId, reactionTypeId, postId)

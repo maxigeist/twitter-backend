@@ -1,3 +1,3 @@
-import { db } from '../utils/database'
+import { db } from './database'
 
 export default db
