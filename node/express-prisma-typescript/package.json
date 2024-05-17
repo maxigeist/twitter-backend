@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc && tsc-alias",
     "prod": "yarn db:migrate && node dist/server.js",
-    "dev": "yarn db:migrate && yarn db:generate && nodemon -q",
-    "test": "NODE_ENV=test jest",
+    "dev": "yarn db:migrate && yarn db:generate && NODE_ENV=development nodemon -q",
+    "test": "NODE_ENV=test jest --watch",
     "lint": "eslint --fix . && prisma format",
     "db:migrate": "prisma migrate deploy",
     "db:make-migrations": "prisma migrate dev",
@@ -16,6 +16,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.569.0",
     "@aws-sdk/s3-request-presigner": "^3.569.0",
+    "@jest/globals": "^29.7.0",
     "@prisma/client": "^4.9.0",
     "@types/async": "^3.2.24",
     "bcrypt": "^5.1.0",

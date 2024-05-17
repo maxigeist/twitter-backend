@@ -1,6 +1,6 @@
 import { prismaMock } from './config'
-import { UserServiceImpl } from '../src/domains/user/service'
-import { UserRepositoryImpl } from '../src/domains/user/repository'
+import { UserServiceImpl } from '../domains/user/service'
+import { UserRepositoryImpl } from '../domains/user/repository'
 
 let user: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 

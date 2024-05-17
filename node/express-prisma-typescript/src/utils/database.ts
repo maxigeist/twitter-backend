@@ -1,14 +1,13 @@
 import { PrismaClient } from '@prisma/client'
-import { prismaMock } from '../test/config'
-
-const { NODE_ENV } = process.env
+import * as process from 'node:process'
+import { getPrismaMock } from '../test/config'
 
 let db: PrismaClient
 
-if (NODE_ENV === 'production') {
+if (process.env.NODE_ENV === 'development') {
   db = new PrismaClient()
 } else {
-  db = prismaMock
+  db = new PrismaClient()
 }
 
 export { db }

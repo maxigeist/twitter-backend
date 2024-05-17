@@ -1,4 +1,4 @@
-import { prismaMock } from './config'
+import prismaMock from './config'
 import { PostServiceImpl } from '../domains/post/service'
 import { PostRepositoryImpl } from '../domains/post/repository'
 import { ForbiddenException, NotFoundException } from '../utils'
