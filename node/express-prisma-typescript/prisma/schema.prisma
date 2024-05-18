@@ -34,6 +34,8 @@ model User {
   followers         Follow[]           @relation(name: "followers")
   profileVisibility ProfileVisibility?
   reactions         Reaction[]
+  sentMessages      Message[]          @relation(name: "sentMessages")
+  UserConversation  UserConversation[]
 }
 
 model Follow {
@@ -48,6 +50,22 @@ model Follow {
 
   follower User @relation(name: "follows", fields: [followerId], references: [id], onDelete: Cascade) // One to many
   followed User @relation(name: "followers", fields: [followedId], references: [id], onDelete: Cascade) // One to many
+}
+
+model Message {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  content String
+
+  senderId       String @db.Uuid()
+  conversationId String @db.Uuid()
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Optional value
+
+  sender       User         @relation(name: "sentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(name: "conversation", fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
 model Post {
@@ -70,16 +88,16 @@ model ProfileVisibility {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
 
   userId        String @unique @db.Uuid()
-  profileTypeId String @unique @db.Uuid()
+  profileTypeId String @db.Uuid()
 
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   type ProfileType @relation(fields: [profileTypeId], references: [id], onDelete: Cascade)
 }
 
 model ProfileType {
-  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
-  type              String
-  profileVisibility ProfileVisibility?
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+  type              String              @unique
+  ProfileVisibility ProfileVisibility[]
 }
 
 model Reaction {
@@ -102,4 +120,31 @@ model ReactionType {
   id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
   type     String
   reaction Reaction[]
+}
+
+model Conversation {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  name String
+
+  picture          String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  deletedAt        DateTime? // Optional value
+  UserConversation UserConversation[]
+  messages         Message[]          @relation(name: "conversation")
+}
+
+model UserConversation {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid // Primary Key
+
+  userId         String @db.Uuid()
+  conversationId String @db.Uuid()
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Optional value
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }

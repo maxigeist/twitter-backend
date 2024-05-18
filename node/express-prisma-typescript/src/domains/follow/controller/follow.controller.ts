@@ -16,9 +16,9 @@ followRouter.post('/:userId', async (req: Request, res: Response) => {
   return res.status(HttpStatus.CREATED).json(follow)
 })
 
-followRouter.delete('/:userId', async (req: Request, res: Response) => {
-  const { userId } = res.locals.context
-  const { userId: otherUserId } = req.params
-  await service.deleteFollow(userId, otherUserId)
-  return res.status(HttpStatus.CREATED).json({ message: 'The user was deleted' })
-})
+// followRouter.post('/:userId', async (req: Request, res: Response) => {
+//   const { userId } = res.locals.context
+//   const { userId: otherUserId } = req.params
+//   await service.deleteFollow(userId, otherUserId)
+//   return res.status(HttpStatus.CREATED).json({ message: 'The user was deleted' })
+// })
