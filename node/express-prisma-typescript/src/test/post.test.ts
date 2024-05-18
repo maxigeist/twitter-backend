@@ -1,8 +1,9 @@
-import prismaMock from './config'
+import { prismaMock } from './config'
 import { PostServiceImpl } from '../domains/post/service'
 import { PostRepositoryImpl } from '../domains/post/repository'
 import { ForbiddenException, NotFoundException } from '../utils'
-
+import { beforeAll, describe } from '@jest/globals'
+import { db } from '../utils/database'
 let user: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let user2: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let post: { id: string
@@ -18,7 +19,7 @@ let comment: { id: string, authorId: string, relatedPost: string, content: strin
 let follow: { id: string, followerId: string, followedId: string, createdAt: Date, updatedAt: Date, deletedAt: Date }
 const date = new Date()
 let profileVisibility: { id: string, userId: string, profileTypeId: string }
-const postRepositoryImpl = new PostRepositoryImpl(prismaMock)
+const postRepositoryImpl = new PostRepositoryImpl(db)
 const postServiceImpl = new PostServiceImpl(postRepositoryImpl)
 describe('Post tests', () => {
   beforeAll(async () => {
@@ -96,11 +97,11 @@ describe('Post tests', () => {
     prismaMock.post.findUnique.mockResolvedValue(post)
     prismaMock.follow.findFirst.mockResolvedValue(null)
     prismaMock.profileVisibility.findFirst.mockResolvedValue(profileVisibility)
-    await expect(postServiceImpl.getPost(user.id, post.id)).rejects.toThrow(ForbiddenException)
+    await expect(postServiceImpl.getPost(user.id, post.id)).rejects.toEqual(new ForbiddenException())
   })
   test('should not return a post if the post does not exist', async () => {
     prismaMock.post.findUnique.mockResolvedValue(null)
-    await expect(postServiceImpl.getPost(user.id, post.id)).rejects.toThrow(NotFoundException)
+    await expect(postServiceImpl.getPost(user.id, post.id)).rejects.toEqual(new NotFoundException('post'))
   })
 
   test('should return comments if the user has a public profile and the ', async () => {
@@ -122,6 +123,6 @@ describe('Post tests', () => {
 
   test('cant create a comment if the post does not exist', async () => {
     prismaMock.post.findUnique.mockResolvedValue(null)
-    await expect(postServiceImpl.createComment(user.id, comment, post.id)).rejects.toThrow(NotFoundException)
+    await expect(postServiceImpl.createComment(user.id, comment, post.id)).rejects.toEqual(new NotFoundException('post'))
   })
 })

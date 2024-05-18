@@ -2,13 +2,14 @@
 import { FollowRepositoryImpl } from '../domains/follow/repository'
 import { FollowServiceImpl } from '../domains/follow/service'
 import { NotFoundException, ValidationException } from '../utils'
-import { PrismaMock } from '../test/config'
+import { db } from '../utils/database'
+import { prismaMock } from './config'
+import { mockReset } from 'jest-mock-extended'
 
 let user: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let user2: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let follow: { id: string, followerId: string, followedId: string, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let extendedFollow: { id: string, followerId: string, followedId: string, createdAt: Date }
-const prismaMock = new PrismaMock().prismaMock
 describe('Follow tests', () => {
   beforeAll(async () => {
     const date = new Date()
@@ -49,28 +50,29 @@ describe('Follow tests', () => {
       createdAt: date
     }
   })
+  beforeEach(() => {
+    mockReset(prismaMock)
+  })
 
   test('should follow a user', async () => {
     prismaMock.follow.findFirst.mockResolvedValue(null)
     prismaMock.follow.create.mockResolvedValue(follow)
 
-    const followRepositoryImpl = new FollowRepositoryImpl(prismaMock)
+    const followRepositoryImpl = new FollowRepositoryImpl(db)
     const followService = new FollowServiceImpl(followRepositoryImpl)
     await expect(followService.createFollow(user.id, user2.id)).resolves.toEqual(extendedFollow)
   })
 
   test('should not follow a user if the other userId does not exist', async () => {
-    prismaMock.follow.findFirst.mockResolvedValue(null)
-    prismaMock.follow.create.mockRejectedValue(new Error('User not found'))
-    const followRepositoryImpl = new FollowRepositoryImpl(prismaMock)
+    const followRepositoryImpl = new FollowRepositoryImpl(db)
     const followService = new FollowServiceImpl(followRepositoryImpl)
-    await expect(followService.createFollow(user.id, '')).rejects.toThrow(NotFoundException)
+    await expect(followService.createFollow(user.id, '')).rejects.toEqual(new NotFoundException('user'))
   })
 
   test('should not follow a user if the userid are the same', async () => {
-    prismaMock.follow.findFirst.mockResolvedValue(null)
-    const followRepositoryImpl = new FollowRepositoryImpl(prismaMock)
+    // prismaMock.follow.findFirst.mockResolvedValue(null)
+    const followRepositoryImpl = new FollowRepositoryImpl(db)
     const followService = new FollowServiceImpl(followRepositoryImpl)
-    await expect(followService.createFollow(user.id, user.id)).rejects.toThrow(ValidationException)
+    await expect(followService.createFollow(user.id, user.id)).rejects.toEqual(new ValidationException([{ message: "A user can't follow himself" }]))
   })
 })

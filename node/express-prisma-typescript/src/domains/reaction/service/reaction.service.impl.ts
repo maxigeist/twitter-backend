@@ -3,7 +3,8 @@ import { ExtendedReactionDto, ReactionDto } from '@domains/reaction/dto'
 import { ReactionRepository } from '@domains/reaction/repository/reaction.repository'
 import { PostServiceImpl } from '@domains/post/service'
 import { PostRepositoryImpl } from '@domains/post/repository'
-import { db, NotFoundException } from '@utils'
+import { NotFoundException } from '@utils'
+import { db } from '@utils/database'
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly reactionRepository: ReactionRepository) {
   }

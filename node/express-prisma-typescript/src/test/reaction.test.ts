@@ -1,8 +1,9 @@
-import { prismaMock } from './config'
-
 import { ReactionRepositoryImpl } from '../domains/reaction/repository'
 import { ReactionServiceImpl } from '../domains/reaction/service'
 import { ForbiddenException, NotFoundException } from '../utils'
+import { prismaMock } from './config'
+import { beforeAll, describe } from '@jest/globals'
+import { db } from '../utils/database'
 
 let user: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
 let user2: { id: string, name: string, email: string, password: string, username: string, profilePicture: string | null, createdAt: Date, updatedAt: Date, deletedAt: Date }
@@ -90,7 +91,7 @@ describe('Reaction tests', () => {
     prismaMock.profileVisibility.findFirst.mockResolvedValue(null)
     prismaMock.reaction.create.mockResolvedValue(reaction)
 
-    const reactionRepositoryImpl = new ReactionRepositoryImpl(prismaMock)
+    const reactionRepositoryImpl = new ReactionRepositoryImpl(db)
     const reactionService = new ReactionServiceImpl(reactionRepositoryImpl)
     await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).resolves.toEqual({
       id: '59ffd7fb-ea8e-47c0-b36a-8461a5526f6d',
@@ -104,16 +105,16 @@ describe('Reaction tests', () => {
   test('should not make a reaction if the post does not exist', async () => {
     prismaMock.reactionType.findFirst.mockResolvedValue(reactionType)
     prismaMock.post.findUnique.mockResolvedValue(null)
-    const reactionRepositoryImpl = new ReactionRepositoryImpl(prismaMock)
+    const reactionRepositoryImpl = new ReactionRepositoryImpl(db)
     const reactionService = new ReactionServiceImpl(reactionRepositoryImpl)
-    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toThrow(NotFoundException)
+    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toEqual(new NotFoundException('post'))
   })
 
   test('should not make a reaction if the reaction type does not exist', async () => {
     prismaMock.reactionType.findFirst.mockResolvedValue(null)
-    const reactionRepositoryImpl = new ReactionRepositoryImpl(prismaMock)
+    const reactionRepositoryImpl = new ReactionRepositoryImpl(db)
     const reactionService = new ReactionServiceImpl(reactionRepositoryImpl)
-    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toThrow(NotFoundException)
+    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toEqual(new NotFoundException('reaction type'))
   })
 
   test('should not make a reaction if the user does not follow the author of the post', async () => {
@@ -122,8 +123,8 @@ describe('Reaction tests', () => {
     prismaMock.reaction.findMany.mockResolvedValue([])
     prismaMock.follow.findFirst.mockResolvedValue(null)
     prismaMock.profileVisibility.findFirst.mockResolvedValue(profileVisibility)
-    const reactionRepositoryImpl = new ReactionRepositoryImpl(prismaMock)
+    const reactionRepositoryImpl = new ReactionRepositoryImpl(db)
     const reactionService = new ReactionServiceImpl(reactionRepositoryImpl)
-    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toThrow(ForbiddenException)
+    await expect(reactionService.createReaction(user.id, reactionType.type, post.id)).rejects.toEqual(new ForbiddenException())
   })
 })
