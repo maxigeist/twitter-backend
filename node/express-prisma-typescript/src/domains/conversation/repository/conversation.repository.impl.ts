@@ -88,7 +88,7 @@ export class ConversationRepositoryImpl implements ConversationRepository {
 
     return userConversations.map(userConversation => {
       const conversation = userConversation.conversation
-      return new ConversationViewDTO({ id: conversation.id, name: conversation.name, picture: conversation.picture ? conversation.picture : null, lastMessage: new MessageDTO(conversation.messages[0]) })
+      return new ConversationViewDTO({ id: conversation.id, name: conversation.name, picture: conversation.picture ? conversation.picture : null, lastMessage: conversation.messages.length > 0 ? new MessageDTO(conversation.messages[0]) : null })
     })
   }
 

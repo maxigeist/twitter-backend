@@ -34,6 +34,6 @@ export class ConversationViewDTO {
 
   id: string
   name: string
-  lastMessage: MessageDTO
+  lastMessage: MessageDTO | null
   picture: string | null
 }

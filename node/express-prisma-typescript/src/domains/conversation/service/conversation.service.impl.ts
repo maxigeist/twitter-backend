@@ -16,7 +16,12 @@ export class ConversationServiceImpl implements ConversationService {
   userService: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
 
   async getAllConversations (userId: string): Promise<ConversationViewDTO[]> {
-    return await this.conversationRepository.getAllConversations(userId)
+    try {
+      return await this.conversationRepository.getAllConversations(userId)
+    } catch (error) {
+      console.log(error)
+    }
+    return []
   }
 
   async getAllMessagesFromConversation (userId: string, conversationId: string): Promise<MessageDTO[]> {
