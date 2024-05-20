@@ -56,7 +56,7 @@ describe('Follow tests', () => {
 
   test('should follow a user', async () => {
     prismaMock.follow.findFirst.mockResolvedValue(null)
-    // prismaMock.follow.create.mockResolvedValue(follow)
+    prismaMock.follow.create.mockResolvedValue(follow)
 
     const followRepositoryImpl = new FollowRepositoryImpl(db)
     const followService = new FollowServiceImpl(followRepositoryImpl)
