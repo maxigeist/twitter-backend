@@ -15,7 +15,7 @@ jobs:
           node-version: '20.x'
       - name: Install Dependencies
         run: npm ci
-        working-directory: ../../node/express-prisma-typescript
+        working-directory: node/express-prisma-typescript
       - name: Run tests
         run: npm test
-        working-directory: ../../node/express-prisma-typescript
+        working-directory: node/express-prisma-typescript
