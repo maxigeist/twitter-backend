@@ -14,7 +14,7 @@ export class ExtendedUserDTO extends UserDTO {
   constructor (user: ExtendedUserDTO) {
     super(user)
     this.email = user.email
-    this.name = user.name
+    this.username = user.username
     this.password = user.password
   }
 
@@ -31,7 +31,7 @@ export class UserViewDTO {
   }
 
   id: string
-  name: string
+  name: string | null
   username: string
   profilePicture: string | null
 }

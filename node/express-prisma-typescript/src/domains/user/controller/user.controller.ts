@@ -25,17 +25,25 @@ userRouter.get('/', async (req: Request, res: Response) => {
 userRouter.get('/me', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
 
-  const user = await service.getUser(userId)
+  const user = await service.getUser(userId, '')
 
   return res.status(HttpStatus.OK).json(user)
 })
 
 userRouter.get('/:userId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
   const { userId: otherUserId } = req.params
 
-  const user = await service.getUser(otherUserId)
+  const user = await service.getUser(userId, otherUserId)
 
   return res.status(HttpStatus.OK).json(user)
+})
+
+userRouter.get('/by_username/:username', async (req: Request, res: Response) => {
+  const { username } = req.params
+  const { limit, before, after } = req.query as Record<string, string>
+  const users = await service.getUsersByUsername(username, { limit: Number(limit), before, after })
+  return res.status(HttpStatus.OK).json(users)
 })
 
 userRouter.delete('/', async (req: Request, res: Response) => {

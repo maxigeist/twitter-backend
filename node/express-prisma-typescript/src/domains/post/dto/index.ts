@@ -12,6 +12,8 @@ export class CreatePostInputDTO {
     images?: string[]
 }
 
+// They could use the same but it makes no sense because the comment may have a longer length
+
 export class PostDTO {
   constructor (post: PostDTO) {
     this.id = post.id
