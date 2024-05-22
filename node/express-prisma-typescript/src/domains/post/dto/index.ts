@@ -6,11 +6,9 @@ export class CreatePostInputDTO {
   @IsNotEmpty()
   @MaxLength(240)
     content!: string
-
-  @IsOptional()
-  @MaxLength(4)
-    images?: string[]
 }
+
+// They could use the same but it makes no sense because the comment may have a longer length
 
 export class PostDTO {
   constructor (post: PostDTO) {
