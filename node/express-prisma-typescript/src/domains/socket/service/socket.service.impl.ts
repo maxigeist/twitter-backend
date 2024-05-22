@@ -1,20 +1,20 @@
 import { CreateMessageInputDTO, MessageDTO } from '@domains/message/dto'
-import { UserService, UserServiceImpl } from '@domains/user/service'
-import { UserRepositoryImpl } from '@domains/user/repository'
-import { db } from '@utils'
-import { FollowService, FollowServiceImpl } from '@domains/follow/service'
-import { FollowRepositoryImpl } from '@domains/follow/repository'
+import { db, ForbiddenException } from '@utils'
 import { SocketService } from '@domains/socket/service/socket.service'
 import { SocketRepository } from '@domains/socket/repository'
+import { ConversationService, ConversationServiceImpl } from '@domains/conversation/service'
+import { ConversationRepositoryImpl } from '@domains/conversation/repository/conversation.repository.impl'
 
 export class SocketServiceImpl implements SocketService {
   constructor (private readonly messageRepository: SocketRepository) {
   }
 
-  userService: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
-  followService: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
+  conversationService: ConversationService = new ConversationServiceImpl(new ConversationRepositoryImpl(db))
 
   async createMessage (userId: string, message: CreateMessageInputDTO): Promise<MessageDTO> {
+    if (!(await this.conversationService.userIsMemberOfConversation(userId, message.conversationId))) {
+      throw new ForbiddenException()
+    }
     return await this.messageRepository.createMessage(userId, message)
   }
 }

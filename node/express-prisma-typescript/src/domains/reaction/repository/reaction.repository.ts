@@ -2,7 +2,7 @@ import { ExtendedReactionDto, ReactionDto } from '@domains/reaction/dto'
 import { CommentDTO } from '@domains/comment/dto'
 
 export interface ReactionRepository {
-  create: (reaction: ReactionDto) => Promise<ExtendedReactionDto>
+  create: (userId: string, postId: string, reactionTypeId: string) => Promise<ExtendedReactionDto>
 
   delete: (reactionId: string) => Promise<void>
 

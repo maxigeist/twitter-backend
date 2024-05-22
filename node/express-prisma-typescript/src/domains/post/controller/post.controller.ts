@@ -58,3 +58,13 @@ postRouter.delete('/:postId', async (req: Request, res: Response) => {
 
   return res.status(HttpStatus.OK).send(`Deleted post ${postId}`)
 })
+
+postRouter.get('/upload/image/:post_id', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { post_id } = req.params
+  const { amount } = req.query
+
+  const signedUrls = await service.uploadPicturesToPost(userId, post_id, Number(amount))
+
+  return res.status(HttpStatus.OK).json({ urls: signedUrls })
+})

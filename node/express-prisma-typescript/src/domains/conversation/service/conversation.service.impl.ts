@@ -4,13 +4,12 @@ import { MessageDTO } from '@domains/message/dto'
 import { ConversationRepository } from '@domains/conversation/repository/conversation.repository'
 import { FollowService, FollowServiceImpl } from '@domains/follow/service'
 import { FollowRepositoryImpl } from '@domains/follow/repository'
-import { db, ForbiddenException } from '@utils'
+import { db, ForbiddenException, uuidValidator, ValidationException } from '@utils'
 import { UserService, UserServiceImpl } from '@domains/user/service'
 import { UserRepositoryImpl } from '@domains/user/repository'
 
 export class ConversationServiceImpl implements ConversationService {
-  constructor (private readonly conversationRepository: ConversationRepository) {
-  }
+  constructor (private readonly conversationRepository: ConversationRepository) {}
 
   followService: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
   userService: UserService = new UserServiceImpl(new UserRepositoryImpl(db))
@@ -20,7 +19,8 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getAllMessagesFromConversation (userId: string, conversationId: string): Promise<MessageDTO[]> {
-    if (!await this.conversationRepository.userIsMemberOfConversation(userId, conversationId)) {
+    uuidValidator(conversationId)
+    if (!(await this.conversationRepository.userIsMemberOfConversation(userId, conversationId))) {
       throw new ForbiddenException()
     }
     return await this.conversationRepository.getAllMessagesFromConversation(conversationId)
@@ -28,19 +28,24 @@ export class ConversationServiceImpl implements ConversationService {
 
   async createConversation (conversationName: string, userId: string, receivers: string[]): Promise<ConversationDTO> {
     let conversationNameAux = conversationName
+    if (receivers.length === 1) {
+      uuidValidator(receivers[0])
+      if (await this.conversationRepository.getConversationByReceiverIds([userId, receivers[0]])) {
+        throw new ValidationException([{ message: 'Conversation already exists' }])
+      } else {
+        const user = await this.userService.getUserById(receivers[0])
+        if (user?.username) {
+          conversationNameAux = user.username
+        }
+      }
+    }
     for (const receiver of receivers) {
-      if (!await this.followService.userFollows(userId, receiver)) {
+      uuidValidator(receiver)
+      if (!(await this.followService.userFollows(userId, receiver))) {
         throw new ForbiddenException()
       }
     }
-    if (receivers.length === 1) {
-      const user = await this.userService.getUserById(receivers[0])
-      if (user?.username) {
-        conversationNameAux = user.username
-      }
-    }
-    receivers.push(userId)
-    return await this.conversationRepository.createConversation(conversationNameAux, receivers)
+    return await this.conversationRepository.createConversation(conversationNameAux, [userId, ...receivers])
   }
 
   async userIsMemberOfConversation (userId: string, conversationId: string): Promise<boolean> {

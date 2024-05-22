@@ -120,4 +120,30 @@ export class UserRepositoryImpl implements UserRepository {
     })
     return user ? new UserViewDTO(user) : null
   }
+
+  async changeVisibility (userId: string, type: string): Promise<void> {
+    await this.db.profileVisibility.update({
+      where: {
+        userId
+      },
+      data: {
+        type: {
+          connect: {
+            type
+          }
+        }
+      }
+    })
+  }
+
+  async savePicture (userId: string, imageName: string): Promise<void> {
+    await this.db.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        profilePicture: imageName
+      }
+    })
+  }
 }

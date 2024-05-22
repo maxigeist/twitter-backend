@@ -5,9 +5,13 @@ import { PrismaClient } from '@prisma/client'
 export class ReactionRepositoryImpl implements ReactionRepository {
   constructor (private readonly db: PrismaClient) {}
 
-  async create (data: ReactionDto): Promise<ExtendedReactionDto> {
+  async create (userId: string, postId: string, reactionTypeId: string): Promise<ExtendedReactionDto> {
     const reaction = await this.db.reaction.create({
-      data
+      data: {
+        userId,
+        postId,
+        reactionTypeId
+      }
     })
     return new ExtendedReactionDto(reaction)
   }

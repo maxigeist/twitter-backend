@@ -5,7 +5,7 @@ import { UserViewDTO } from '@domains/user/dto'
 export class CreateConversationInputDTO {
   @IsString()
   @IsNotEmpty()
-    content!: string
+    conversationName!: string
 
   @IsArray()
   @IsNotEmpty()
@@ -34,6 +34,6 @@ export class ConversationViewDTO {
 
   id: string
   name: string
-  lastMessage: MessageDTO
+  lastMessage: MessageDTO | null
   picture: string | null
 }

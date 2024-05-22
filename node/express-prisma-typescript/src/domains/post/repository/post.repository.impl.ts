@@ -224,4 +224,15 @@ export class PostRepositoryImpl implements PostRepository {
     })
     return qtyComments
   }
+
+  async savePictures (postId: string, images: string[]): Promise<void> {
+    await this.db.post.update({
+      where: {
+        id: postId
+      },
+      data: {
+        images
+      }
+    })
+  }
 }

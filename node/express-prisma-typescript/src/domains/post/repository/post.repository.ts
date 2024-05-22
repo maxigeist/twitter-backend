@@ -26,4 +26,5 @@ export interface PostRepository {
   getCommentsByAuthorId: (authorId: string) => Promise<CommentDTO[]>
   getCommentsFromPost: (followedUserIds: string[], postId: string, options: CursorPagination) => Promise<PostWithReactionsAndAuthor[]>
   getCommentQty: (postId: string) => Promise<number>
+  savePictures: (postId: string, images: string[]) => Promise<void>
 }

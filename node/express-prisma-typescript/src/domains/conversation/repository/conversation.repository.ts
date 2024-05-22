@@ -11,4 +11,6 @@ export interface ConversationRepository {
 
   createConversation: (conversationName: string, receivers: string[]) => Promise<ConversationDTO>
 
+  getConversationByReceiverIds: (receiverIds: string[]) => Promise<boolean>
+
 }

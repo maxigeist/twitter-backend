@@ -11,7 +11,7 @@ export class ConversationRepositoryImpl implements ConversationRepository {
     const conversation = await this.db.conversation.create({
       data: {
         UserConversation: {
-          create: receivers.map(userId => ({ userId }))
+          create: receivers.map((userId) => ({ userId }))
         },
         name: conversationName
       },
@@ -26,7 +26,7 @@ export class ConversationRepositoryImpl implements ConversationRepository {
     return new ConversationDTO({
       id: conversation.id,
       name: conversation.name,
-      members: conversation.UserConversation.map(uc => new UserViewDTO(uc.user))
+      members: conversation.UserConversation.map((uc) => new UserViewDTO(uc.user))
     })
   }
 
@@ -48,6 +48,9 @@ export class ConversationRepositoryImpl implements ConversationRepository {
                     profilePicture: true
                   }
                 }
+              },
+              orderBy: {
+                createdAt: 'desc'
               }
             }
           }
@@ -86,9 +89,14 @@ export class ConversationRepositoryImpl implements ConversationRepository {
       }
     })
 
-    return userConversations.map(userConversation => {
+    return userConversations.map((userConversation) => {
       const conversation = userConversation.conversation
-      return new ConversationViewDTO({ id: conversation.id, name: conversation.name, picture: conversation.picture ? conversation.picture : null, lastMessage: new MessageDTO(conversation.messages[0]) })
+      return new ConversationViewDTO({
+        id: conversation.id,
+        name: conversation.name,
+        picture: conversation.picture ? conversation.picture : null,
+        lastMessage: conversation.messages.length > 0 ? new MessageDTO(conversation.messages[0]) : null
+      })
     })
   }
 
@@ -100,5 +108,20 @@ export class ConversationRepositoryImpl implements ConversationRepository {
       }
     })
     return !!userConversation
+  }
+
+  async getConversationByReceiverIds (receiverIds: string[]): Promise<boolean> {
+    const conversation = await this.db.conversation.findFirst({
+      where: {
+        UserConversation: {
+          every: {
+            userId: {
+              in: receiverIds
+            }
+          }
+        }
+      }
+    })
+    return Boolean(conversation)
   }
 }

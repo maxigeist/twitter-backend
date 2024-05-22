@@ -3,5 +3,6 @@
   "arrowParens": "always",
   "printWidth": 120,
   "space-before-function-paren": true,
+  "trailingComma": "none",
   "semi": false
 }

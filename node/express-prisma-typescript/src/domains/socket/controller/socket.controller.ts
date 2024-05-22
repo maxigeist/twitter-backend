@@ -18,8 +18,12 @@ export class SocketController {
       socket.on('send message', async (msg) => {
         const { content, conversationId } = msg
         const { userId } = socket.handshake.auth.userId
-        const messageAux = await service.createMessage(userId, { content, conversationId })
-        socket.broadcast.to(conversationId).emit('receive message', messageAux.content)
+        try {
+          const messageAux = await service.createMessage(userId, { content, conversationId })
+          socket.broadcast.to(conversationId).emit('receive message', messageAux.content)
+        } catch (error) {
+          socket.disconnect()
+        }
       })
 
       socket.on('join room', async (msg) => {
@@ -33,7 +37,6 @@ export class SocketController {
       })
 
       socket.on('disconnect', () => {
-        console.log('user disconnected')
       })
     })
   }

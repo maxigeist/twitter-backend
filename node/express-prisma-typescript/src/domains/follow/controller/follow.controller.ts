@@ -9,7 +9,7 @@ export const followRouter = Router()
 
 const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
 
-followRouter.post('/:userId', async (req: Request, res: Response) => {
+followRouter.post('/toggle/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { userId: otherUserId } = req.params
   const follow = await service.createFollow(userId, otherUserId)

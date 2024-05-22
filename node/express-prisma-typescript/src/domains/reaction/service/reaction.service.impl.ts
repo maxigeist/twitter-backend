@@ -3,7 +3,7 @@ import { ExtendedReactionDto, ReactionDto } from '@domains/reaction/dto'
 import { ReactionRepository } from '@domains/reaction/repository/reaction.repository'
 import { PostServiceImpl } from '@domains/post/service'
 import { PostRepositoryImpl } from '@domains/post/repository'
-import { NotFoundException } from '@utils'
+import { NotFoundException, uuidValidator } from '@utils'
 import { db } from '@utils/database'
 export class ReactionServiceImpl implements ReactionService {
   constructor (private readonly reactionRepository: ReactionRepository) {
@@ -12,23 +12,18 @@ export class ReactionServiceImpl implements ReactionService {
   postService: PostServiceImpl = new PostServiceImpl(new PostRepositoryImpl(db))
 
   async createReaction (userId: string, reactionType: string, postId: string): Promise<ExtendedReactionDto> {
+    uuidValidator(postId)
     const reactionTypeId = await this.reactionRepository.getReactionTypeId(reactionType) as string
     if (!reactionTypeId) {
       throw new NotFoundException('reaction type')
     }
-    const reaction = { userId, reactionTypeId, postId }
-    if (await this.postService.getById(postId)) {
-      const reactionFromDB = await this.reactionRepository.checkIfReactionExists(userId, reactionTypeId, postId)
-      if (!reactionFromDB) {
-        const authorId = await this.postService.getPostAuthorId(postId)
-        if (await this.postService.checkAccessToPost(userId, authorId)) {
-          return await this.reactionRepository.create(new ReactionDto(reaction))
-        }
-      }
-      await this.deleteReaction(reactionFromDB?.id as string)
-      return reactionFromDB as ExtendedReactionDto
+    await this.postService.getPost(userId, postId)
+    const reactionFromDB = await this.reactionRepository.checkIfReactionExists(userId, reactionTypeId, postId)
+    if (!reactionFromDB) {
+      return await this.reactionRepository.create(userId, postId, reactionTypeId)
     }
-    throw new NotFoundException('post')
+    await this.deleteReaction(reactionFromDB?.id)
+    return reactionFromDB
   }
 
   async deleteReaction (reactionId: string): Promise<void> {

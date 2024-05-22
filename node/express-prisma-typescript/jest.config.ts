@@ -6,5 +6,6 @@ module.exports = {
   moduleNameMapper:{
     '^@utils': '<rootDir>/src/utils',
     '^@domains/(.*)': '<rootDir>/src/domains/$1',
+    '^@bucket': '<rootDir>/src/bucket',
   }
 }

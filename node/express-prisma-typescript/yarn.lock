@@ -2024,6 +2024,19 @@
   resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.3.tgz"
   integrity sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==
 
+"@types/swagger-ui-express@^4.1.6":
+  version "4.1.6"
+  resolved "https://registry.npmjs.org/@types/swagger-ui-express/-/swagger-ui-express-4.1.6.tgz"
+  integrity sha512-UVSiGYXa5IzdJJG3hrc86e8KdZWLYxyEsVoUI4iPXc7CO4VZ3AfNP8d/8+hrDRIqz+HAaSMtZSqAsF3Nq2X/Dg==
+  dependencies:
+    "@types/express" "*"
+    "@types/serve-static" "*"
+
+"@types/uuid-validate@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/@types/uuid-validate/-/uuid-validate-0.0.3.tgz"
+  integrity sha512-htkuv1+RZjjHkSrXets3a6kqDeqgYutBtdER3U6I1mWV58AIsDFWoUuN0cB6DMOWiqTHK0XqH3pXeqIVfJIrog==
+
 "@types/uuid@^9.0.8":
   version "9.0.8"
   resolved "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.8.tgz"
@@ -3295,7 +3308,7 @@ express-async-errors@^3.1.1:
   resolved "https://registry.npmjs.org/express-async-errors/-/express-async-errors-3.1.1.tgz"
   integrity sha512-h6aK1da4tpqWSbyCa3FxB/V6Ehd4EEB15zyQq9qe75OZBp0krinNKuH4rAY+S/U/2I36vdLAUFSjQJ+TFmODng==
 
-express@^4.16.2, express@^4.18.2:
+express@^4.16.2, express@^4.18.2, "express@>=4.0.0 || >=5.0.0-beta":
   version "4.19.2"
   resolved "https://registry.npmjs.org/express/-/express-4.19.2.tgz"
   integrity sha512-5T6nhjsT+EOMzuck8JjBHARTHfMht0POzlA60WV2pMD3gyXw2LZnZ+ueGdNxG+0calOJcWKbpFcuzLZ91YWq9Q==
@@ -5568,6 +5581,18 @@ supports-preserve-symlinks-flag@^1.0.0:
   resolved "https://registry.npmjs.org/supports-preserve-symlinks-flag/-/supports-preserve-symlinks-flag-1.0.0.tgz"
   integrity sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==
 
+swagger-ui-dist@>=5.0.0:
+  version "5.17.10"
+  resolved "https://registry.npmjs.org/swagger-ui-dist/-/swagger-ui-dist-5.17.10.tgz"
+  integrity sha512-fp8SYeEK216KS1/noDvursUOGojEbkvtckOpOmAGZUjlx/ma7VLD2PLQwyermjlzFrlHI5uCt1V+M1C3qBvRyQ==
+
+swagger-ui-express@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/swagger-ui-express/-/swagger-ui-express-5.0.0.tgz"
+  integrity sha512-tsU9tODVvhyfkNSvf03E6FAk+z+5cU3lXAzMy6Pv4av2Gt2xA0++fogwC4qo19XuFf6hdxevPuVCSKFuMHJhFA==
+  dependencies:
+    swagger-ui-dist ">=5.0.0"
+
 tar@^6.1.11:
   version "6.2.1"
   resolved "https://registry.npmjs.org/tar/-/tar-6.2.1.tgz"
@@ -5807,6 +5832,11 @@ utils-merge@1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz"
   integrity sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==
+
+uuid-validate@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.npmjs.org/uuid-validate/-/uuid-validate-0.0.3.tgz"
+  integrity sha512-Fykw5U4eZESbq739BeLvEBFRuJODfrlmjx5eJux7W817LjRaq4b7/i4t2zxQmhcX+fAj4nMfRdTzO4tmwLKn0w==
 
 uuid@^9.0.1:
   version "9.0.1"

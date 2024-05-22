@@ -1,12 +1,13 @@
 import { FollowService } from '@domains/follow/service/follow.service'
 import { ExtendedFollowDto, FollowDTO } from '@domains/follow/dto'
 import { FollowRepository } from '@domains/follow/repository/follow.repository'
-import { NotFoundException, ValidationException } from '@utils'
+import { NotFoundException, uuidValidator, ValidationException } from '@utils'
 
 export class FollowServiceImpl implements FollowService {
   constructor (private readonly followRepository: FollowRepository) {}
 
   async createFollow (followerId: string, followedId: string): Promise<ExtendedFollowDto> {
+    uuidValidator(followerId)
     const follow = {
       followerId,
       followedId

@@ -9,8 +9,7 @@ export interface PostService {
   getPost: (userId: string, postId: string) => Promise<PostDTO>
   getLatestPosts: (userId: string, options: { limit?: number, before?: string, after?: string }) => Promise<PostDTO[]>
   getPostsByAuthor: (userId: any, authorId: string) => Promise<ExtendedPostDTO[]>
-  getById: (postId: string) => Promise<PostDTO | null>
-  getPostAuthorId: (postId: string) => Promise<string>
   getCommentsByUser: (userId: string, authorId: string) => Promise<CommentDTO[]>
   getCommentsByPost: (userId: string, options: CursorPagination, postId: string) => Promise <ExtendedPostDTO[]>
+  uploadPicturesToPost: (userId: string, postId: string, images: number) => Promise<string[]>
 }

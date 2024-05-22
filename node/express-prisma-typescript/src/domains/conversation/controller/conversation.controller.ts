@@ -1,10 +1,11 @@
-import { db } from '@utils'
+import { BodyValidation, db } from '@utils'
 import 'express-async-errors'
 import HttpStatus from 'http-status'
 
 import { Request, Router, Response } from 'express'
 import { ConversationService, ConversationServiceImpl } from '@domains/conversation/service'
 import { ConversationRepositoryImpl } from '@domains/conversation/repository/conversation.repository.impl'
+import { CreateConversationInputDTO } from '@domains/conversation/dto'
 
 export const conversationRouter = Router()
 
@@ -23,7 +24,7 @@ conversationRouter.get('/:conversation_id', async (req: Request, res: Response) 
   return res.status(HttpStatus.OK).json(messages)
 })
 
-conversationRouter.post('/', async (req: Request, res: Response) => {
+conversationRouter.post('/', BodyValidation(CreateConversationInputDTO), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { conversationName, receivers } = req.body
   const conversation = await service.createConversation(conversationName, userId, receivers)

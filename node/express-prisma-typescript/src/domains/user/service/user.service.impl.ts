@@ -7,12 +7,15 @@ import { UserService } from './user.service'
 import { FollowService, FollowServiceImpl } from '@domains/follow/service'
 import { FollowRepositoryImpl } from '@domains/follow/repository'
 import { db } from '@utils/database'
+import { uuidValidator } from '@utils/validation'
+import { getSignedUrlAux } from '@bucket'
 
 export class UserServiceImpl implements UserService {
   constructor (private readonly repository: UserRepository) {}
   followService: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
 
   async getUser (userId: string, otherUserId: any): Promise<UserViewDTO> {
+    uuidValidator(otherUserId)
     const user = await this.repository.getById(otherUserId)
     if (user) {
       if (!await this.userHasPrivateAccount(otherUserId) || await this.followService.userFollows(userId, otherUserId)) {
@@ -56,5 +59,19 @@ export class UserServiceImpl implements UserService {
       return user
     }
     throw new NotFoundException('user')
+  }
+
+  async saveProfilePicture (userId: string): Promise<string> {
+    const url = await getSignedUrlAux(userId + '-profile-picture')
+    await this.repository.savePicture(userId, userId + '-profile-picture')
+    return url
+  }
+
+  async changeVisibility (userId: string): Promise<void> {
+    if (await this.userHasPrivateAccount(userId)) {
+      await this.repository.changeVisibility(userId, 'public')
+    } else {
+      await this.repository.changeVisibility(userId, 'private')
+    }
   }
 }

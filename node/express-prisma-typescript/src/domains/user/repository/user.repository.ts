@@ -11,4 +11,6 @@ export interface UserRepository {
   getUsersByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
   userHasPrivateAccount: (userId: string) => Promise<boolean>
   getUserById: (userId: string) => Promise<UserViewDTO | null>
+  changeVisibility: (userId: string, type: string) => Promise<void>
+  savePicture: (userId: string, imageName: string) => Promise<void>
 }
