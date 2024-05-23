@@ -27,7 +27,6 @@ export class UserServiceImpl implements UserService {
   }
 
   async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
-    // TODO: make this return only users followed by users the original user follows
     const usersFollowedId = await this.followService.getUserFollowedId(userId)
     const userFollowedFollowedId: string[] = []
     for (const userFollowedId of usersFollowedId) {

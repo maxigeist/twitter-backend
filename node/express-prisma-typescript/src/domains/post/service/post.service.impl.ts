@@ -45,7 +45,6 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPost (userId: string, postId: string): Promise<PostDTO> {
-    // TODO: validate that the author has public profile or the user follows the author
     uuidValidator(postId)
     const post = await this.repository.getById(postId)
     if (post) {
@@ -56,7 +55,6 @@ export class PostServiceImpl implements PostService {
   }
 
   async getLatestPosts (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
-    // TODO: filter post search to return posts from authors that the user follows
     this.checkPagination(options)
     const followedId = await this.followService.getUserFollowedId(userId)
     // The related post is empty because if not it is a comment.
@@ -71,7 +69,6 @@ export class PostServiceImpl implements PostService {
   }
 
   async getPostsByAuthor (userId: any, authorId: string): Promise<ExtendedPostDTO[]> {
-    // TODO: throw exception when the author has a private profile and the user doesn't follow them
     uuidValidator(authorId)
     await this.checkAccessToPost(userId, authorId)
     const posts = await this.repository.getByAuthorId(authorId)
