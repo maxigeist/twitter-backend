@@ -2,6 +2,7 @@ import { CursorPagination } from '@types'
 import { CreatePostInputDTO, PostDTO } from '../dto'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
 import { Prisma } from '@prisma/client'
+import { ExtendedReactionDto, ReactionDto } from '@domains/reaction/dto'
 
 export type PostWithReactionsAndAuthor = Prisma.PostGetPayload<{
   include: {
@@ -19,12 +20,14 @@ export interface PostRepository {
   createComment: (userId: string, data: CreateCommentInputDTO, postId: string) => Promise <CommentDTO>
   getAllByDatePaginated: (options: CursorPagination) => Promise<PostDTO[]>
   delete: (postId: string) => Promise<void>
-  getById: (postId: string) => Promise<PostDTO | null>
+  getById: (postId: string) => Promise<PostWithReactionsAndAuthor | null>
   getByAuthorId: (authorId: string) => Promise<PostWithReactionsAndAuthor[]>
   getAuthorIdByPostId: (postId: string) => Promise<string>
   getPostFromFollowedOrPublic: (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string) => Promise<PostWithReactionsAndAuthor[]>
+  getPostFromFollowed: (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string) => Promise<PostWithReactionsAndAuthor[]>
   getCommentsByAuthorId: (authorId: string) => Promise<CommentDTO[]>
   getCommentsFromPost: (followedUserIds: string[], postId: string, options: CursorPagination) => Promise<PostWithReactionsAndAuthor[]>
   getCommentQty: (postId: string) => Promise<number>
   savePictures: (postId: string, images: string[]) => Promise<void>
+  getUserReactionsFromPost: (userId: string, postId: string) => Promise<ExtendedReactionDto[]>
 }

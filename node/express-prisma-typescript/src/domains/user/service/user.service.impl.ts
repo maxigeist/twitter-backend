@@ -16,12 +16,9 @@ export class UserServiceImpl implements UserService {
 
   async getUser (userId: string, otherUserId: any): Promise<UserViewDTO> {
     uuidValidator(otherUserId)
-    const user = await this.repository.getById(otherUserId)
+    const user = await this.repository.getById(userId, otherUserId)
     if (user) {
-      if (!await this.userHasPrivateAccount(otherUserId) || await this.followService.userFollows(userId, otherUserId)) {
-        return user
-      }
-      throw new ForbiddenException()
+      return user
     }
     throw new NotFoundException('user')
   }
@@ -50,14 +47,6 @@ export class UserServiceImpl implements UserService {
 
   async userHasPrivateAccount (userId: string): Promise<boolean> {
     return await this.repository.userHasPrivateAccount(userId)
-  }
-
-  async getUserById (userId: string): Promise<UserViewDTO> {
-    const user = await this.repository.getById(userId)
-    if (user) {
-      return user
-    }
-    throw new NotFoundException('user')
   }
 
   async saveProfilePicture (userId: string): Promise<string> {

@@ -9,16 +9,16 @@ export const followRouter = Router()
 
 const service: FollowService = new FollowServiceImpl(new FollowRepositoryImpl(db))
 
-followRouter.post('/toggle/:userId', async (req: Request, res: Response) => {
+followRouter.post('/:userId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { userId: otherUserId } = req.params
   const follow = await service.createFollow(userId, otherUserId)
   return res.status(HttpStatus.CREATED).json(follow)
 })
 
-// followRouter.post('/:userId', async (req: Request, res: Response) => {
-//   const { userId } = res.locals.context
-//   const { userId: otherUserId } = req.params
-//   await service.deleteFollow(userId, otherUserId)
-//   return res.status(HttpStatus.CREATED).json({ message: 'The user was deleted' })
-// })
+followRouter.delete('/:userId', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { userId: otherUserId } = req.params
+  await service.deleteFollow(userId, otherUserId)
+  return res.status(HttpStatus.CREATED).json({ message: 'The user was deleted' })
+})

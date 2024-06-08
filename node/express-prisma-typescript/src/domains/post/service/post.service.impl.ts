@@ -10,7 +10,7 @@ import { FollowServiceImpl } from '@domains/follow/service'
 import { FollowRepositoryImpl } from '@domains/follow/repository'
 import { UserServiceImpl } from '@domains/user/service'
 import { UserRepositoryImpl } from '@domains/user/repository'
-import { getSignedUrlAux } from '@bucket'
+import { deleteObject, getSignedUrlAux } from '@bucket'
 
 export class PostServiceImpl implements PostService {
   constructor (private readonly repository: PostRepository) {
@@ -21,7 +21,10 @@ export class PostServiceImpl implements PostService {
 
   async createPost (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     await validate(data)
-    return await this.repository.create(userId, data)
+    const urls = await this.getPreSignedUrls(data.images ?? [])
+    const postDto = await this.repository.create(userId, data)
+    postDto.images = urls
+    return postDto
   }
 
   async createComment (userId: string, data: CreateCommentInputDTO, postId: string): Promise<CommentDTO> {
@@ -41,15 +44,20 @@ export class PostServiceImpl implements PostService {
     const post = await this.repository.getById(postId)
     if (!post) throw new NotFoundException('post')
     if (post.authorId !== userId) throw new ForbiddenException()
+    console.log(post.images)
+    await deleteObject(post.images)
     await this.repository.delete(postId)
   }
 
-  async getPost (userId: string, postId: string): Promise<PostDTO> {
+  async getPost (userId: string, postId: string): Promise<ExtendedPostDTO> {
     uuidValidator(postId)
     const post = await this.repository.getById(postId)
     if (post) {
       await this.checkAccessToPost(userId, post.authorId)
-      return post
+      const qtyComments = await this.repository.getCommentQty(post.id)
+      const { qtyLikes, qtyRetweets } = this.countReactions(post)
+      const userReactions = await this.repository.getUserReactionsFromPost(userId, post.id)
+      return new ExtendedPostDTO({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets, userReactions })
     }
     throw new NotFoundException('post')
   }
@@ -63,7 +71,23 @@ export class PostServiceImpl implements PostService {
     for (const post of posts) {
       const qtyComments = await this.repository.getCommentQty(post.id)
       const { qtyLikes, qtyRetweets } = this.countReactions(post)
-      extendedPostDTOS.push({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets })
+      const userReactions = await this.repository.getUserReactionsFromPost(userId, post.id)
+      extendedPostDTOS.push({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets, userReactions })
+    }
+    return extendedPostDTOS
+  }
+
+  async getPostsFromFollowed (userId: string, options: CursorPagination): Promise<ExtendedPostDTO[]> {
+    this.checkPagination(options)
+    const followedId = await this.followService.getUserFollowedId(userId)
+    // The related post is empty because if not it is a comment.
+    const posts = await this.repository.getPostFromFollowed(userId, options, followedId, '')
+    const extendedPostDTOS: ExtendedPostDTO[] = []
+    for (const post of posts) {
+      const qtyComments = await this.repository.getCommentQty(post.id)
+      const { qtyLikes, qtyRetweets } = this.countReactions(post)
+      const userReactions = await this.repository.getUserReactionsFromPost(userId, post.id)
+      extendedPostDTOS.push({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets, userReactions })
     }
     return extendedPostDTOS
   }
@@ -78,7 +102,8 @@ export class PostServiceImpl implements PostService {
       for (const post of posts) {
         const qtyComments = await this.repository.getCommentQty(post.id)
         const { qtyLikes, qtyRetweets } = this.countReactions(post)
-        extendedPostDTOS.push({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets })
+        const userReactions = await this.repository.getUserReactionsFromPost(userId, post.id)
+        extendedPostDTOS.push({ id: post.id, authorId: post.authorId, content: post.content, images: post.images, createdAt: post.createdAt, author: post.author, qtyComments, qtyLikes, qtyRetweets, userReactions })
       }
       return extendedPostDTOS
     }
@@ -114,29 +139,29 @@ export class PostServiceImpl implements PostService {
       for (const comment of comments) {
         const qtyComments = await this.repository.getCommentQty(comment.id)
         const { qtyLikes, qtyRetweets } = this.countReactions(comment)
-        extendedPostDTOS.push({ id: comment.id, authorId: comment.authorId, content: comment.content, images: comment.images, createdAt: comment.createdAt, author: comment.author, qtyComments, qtyLikes, qtyRetweets })
+        const userReactions = await this.repository.getUserReactionsFromPost(userId, post.id)
+        extendedPostDTOS.push({ id: comment.id, authorId: comment.authorId, content: comment.content, images: comment.images, createdAt: comment.createdAt, author: comment.author, qtyComments, qtyLikes, qtyRetweets, userReactions })
       }
       return extendedPostDTOS
     }
     throw new NotFoundException('post')
   }
 
-  async uploadPicturesToPost (userId: string, postId: string, images: number): Promise<string[]> {
-    uuidValidator(postId)
-    const post = await this.repository.getById(postId)
-    if (post) {
-      if (post.authorId !== userId) throw new ForbiddenException()
-      const urls: string[] = []
-      const imagesAux: string[] = []
-      for (let i = 0; i < images; i++) {
-        urls.push(await getSignedUrlAux(postId + '-post-picture-' + i.toString()))
-        imagesAux.push(postId + '-post-picture-' + i.toString())
-      }
-      await this.repository.savePictures(postId, imagesAux)
-      return urls
+  async getPreSignedUrls (images: string[]): Promise<string[]> {
+    // uuidValidator(postId)
+    // const post = await this.repository.getById(postId)
+    // if (post) {
+    //   if (post.authorId !== userId) throw new ForbiddenException()
+    const urls: string[] = []
+    // const imagesAux: string[] = []
+    for (let i = 0; i < images.length; i++) {
+      urls.push(await getSignedUrlAux(images[i]))
+      // imagesAux.push(postId + '-post-picture-' + i.toString())
     }
-    throw new NotFoundException('post')
+    // await this.repository.savePictures(postId, imagesAux)
+    return urls
   }
+  // throw new NotFoundException('post')
 
   countReactions (comment: PostWithReactionsAndAuthor): { qtyLikes: number, qtyRetweets: number } {
     let qtyLikes = 0

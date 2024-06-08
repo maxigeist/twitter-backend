@@ -22,7 +22,6 @@ export class ReactionServiceImpl implements ReactionService {
     if (!reactionFromDB) {
       return await this.reactionRepository.create(userId, postId, reactionTypeId)
     }
-    await this.deleteReaction(reactionFromDB?.id)
     return reactionFromDB
   }
 

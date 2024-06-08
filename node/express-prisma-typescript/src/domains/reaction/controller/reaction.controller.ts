@@ -9,19 +9,18 @@ import { ReactionDto } from '@domains/reaction/dto'
 export const reactionRouter = Router()
 const service: ReactionService = new ReactionServiceImpl(new ReactionRepositoryImpl(db))
 
-reactionRouter.post('/toggle/:post_id', BodyValidation(ReactionDto), async (req: Request, res: Response) => {
+reactionRouter.post('/:post_id', BodyValidation(ReactionDto), async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { post_id } = req.params
-  const { reactionType } = req.body
-  const reaction = await service.createReaction(userId, reactionType, post_id)
+  const { type } = req.body
+  const reaction = await service.createReaction(userId, type, post_id)
   return res.status(HttpStatus.CREATED).json(reaction)
 })
 
-reactionRouter.delete('/:post_id', async (req: Request, res: Response) => {
-  const { post_id } = req.params
-  const { reactionId } = req.body
-  await service.deleteReaction(reactionId, post_id)
-  return res.status(HttpStatus.NO_CONTENT)
+reactionRouter.delete('/:reaction_id', async (req: Request, res: Response) => {
+  const { reaction_id } = req.params
+  await service.deleteReaction(reaction_id)
+  return res.status(HttpStatus.NO_CONTENT).json()
 })
 
 reactionRouter.get('/like/:userId', async (req: Request, res: Response) => {

@@ -7,7 +7,6 @@ export interface UserService {
   getUserRecommendations: (userId: any, options: OffsetPagination) => Promise<UserViewDTO[]>
   getUsersByUsername: (username: string, options: CursorPagination) => Promise<UserViewDTO[]>
   userHasPrivateAccount: (userId: string) => Promise<boolean>
-  getUserById: (userId: string) => Promise<UserViewDTO>
   changeVisibility: (userId: string) => Promise<void>
   saveProfilePicture: (userId: string) => Promise<string>
 }

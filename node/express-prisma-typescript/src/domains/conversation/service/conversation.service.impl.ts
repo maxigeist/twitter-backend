@@ -33,7 +33,7 @@ export class ConversationServiceImpl implements ConversationService {
       if (await this.conversationRepository.getConversationByReceiverIds([userId, receivers[0]])) {
         throw new ValidationException([{ message: 'Conversation already exists' }])
       } else {
-        const user = await this.userService.getUserById(receivers[0])
+        const user = await this.userService.getUser(userId, receivers[0])
         if (user?.username) {
           conversationNameAux = user.username
         }

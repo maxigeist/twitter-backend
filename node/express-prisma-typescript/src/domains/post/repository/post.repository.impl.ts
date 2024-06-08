@@ -3,18 +3,21 @@ import { PrismaClient } from '@prisma/client'
 import { CursorPagination } from '@types'
 
 import { PostRepository, PostWithReactionsAndAuthor } from '.'
-import { CreatePostInputDTO, PostDTO } from '../dto'
+import { CreatePostInputDTO, ExtendedPostDTO, PostDTO } from '../dto'
 import { CommentDTO, CreateCommentInputDTO } from '@domains/comment/dto'
+import { ExtendedReactionDto } from '@domains/reaction/dto'
 
 export class PostRepositoryImpl implements PostRepository {
-  constructor (private readonly db: PrismaClient) {}
+  constructor (private readonly db: PrismaClient) {
+  }
 
   async create (userId: string, data: CreatePostInputDTO): Promise<PostDTO> {
     const post = await this.db.post.create({
       data: {
+        content: data.content,
         authorId: userId,
-        relatedPost: '',
-        ...data
+        relatedPost: data.parentId ?? '',
+        images: data.images
       }
     })
     return new PostDTO(post)
@@ -56,13 +59,21 @@ export class PostRepositoryImpl implements PostRepository {
     })
   }
 
-  async getById (postId: string): Promise<PostDTO | null> {
+  async getById (postId: string): Promise<PostWithReactionsAndAuthor | null> {
     const post = await this.db.post.findUnique({
       where: {
         id: postId
+      },
+      include: {
+        reactions: {
+          select: {
+            type: true
+          }
+        },
+        author: true
       }
     })
-    return post != null ? new PostDTO(post) : null
+    return post != null ? post : null
   }
 
   // async getAuthorId(postId: string): Promise<string | null>{
@@ -116,6 +127,48 @@ export class PostRepositoryImpl implements PostRepository {
             authorId: {
               in: followedUserIds
             },
+            relatedPost
+          }
+        ]
+      },
+      include: {
+        reactions: {
+          select: {
+            type: true
+          }
+        },
+        author: true
+      },
+      cursor: options.after ? { id: options.after } : options.before ? { id: options.before } : undefined,
+      skip: options.after ?? options.before ? 1 : undefined,
+      take: options.limit ? (options.before ? -options.limit : options.limit) : undefined,
+      orderBy: [
+        {
+          createdAt: 'desc'
+        },
+        {
+          id: 'asc'
+        }
+      ]
+    })
+    return posts
+  }
+
+  async getPostFromFollowed (currentUserId: string, options: CursorPagination, followedUserIds: string[], relatedPost: string): Promise<PostWithReactionsAndAuthor[]> {
+    const posts = await this.db.post.findMany({
+      where: {
+        AND: [
+          {
+            authorId: {
+              in: followedUserIds
+            }
+          },
+          {
+            NOT: {
+              authorId: currentUserId
+            }
+          },
+          {
             relatedPost
           }
         ]
@@ -234,5 +287,22 @@ export class PostRepositoryImpl implements PostRepository {
         images
       }
     })
+  }
+
+  async getUserReactionsFromPost (userId: string, postId: string): Promise<ExtendedReactionDto[]> {
+    const userReactions = await this.db.reaction.findMany({
+      where: {
+        userId,
+        postId
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
+      }
+    })
+    return userReactions.map((reaction) => new ExtendedReactionDto({ ...reaction, type: reaction.type.type }))
   }
 }

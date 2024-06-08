@@ -1,11 +1,18 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator'
 import { ExtendedUserDTO } from '@domains/user/dto'
+import { ExtendedReactionDto } from '@domains/reaction/dto'
 
 export class CreatePostInputDTO {
   @IsString()
   @IsNotEmpty()
   @MaxLength(240)
     content!: string
+
+  @IsString()
+    parentId?: string
+
+  @IsString({ each: true })
+    images?: string[]
 }
 
 // They could use the same but it makes no sense because the comment may have a longer length
@@ -33,10 +40,12 @@ export class ExtendedPostDTO extends PostDTO {
     this.qtyComments = post.qtyComments
     this.qtyLikes = post.qtyLikes
     this.qtyRetweets = post.qtyRetweets
+    this.userReactions = post.userReactions
   }
 
   author!: ExtendedUserDTO
   qtyComments!: number
   qtyLikes!: number
   qtyRetweets!: number
+  userReactions!: ExtendedReactionDto[]
 }

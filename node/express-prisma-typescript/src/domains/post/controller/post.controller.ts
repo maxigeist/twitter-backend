@@ -23,6 +23,15 @@ postRouter.get('/', async (req: Request, res: Response) => {
   return res.status(HttpStatus.OK).json(posts)
 })
 
+postRouter.get('/following', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const { limit, before, after } = req.query as Record<string, string>
+
+  const posts = await service.getPostsFromFollowed(userId, { limit: Number(limit), before, after })
+
+  return res.status(HttpStatus.OK).json(posts)
+})
+
 postRouter.get('/:postId', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { postId } = req.params
@@ -64,7 +73,7 @@ postRouter.get('/upload/image/:post_id', async (req: Request, res: Response) => 
   const { post_id } = req.params
   const { amount } = req.query
 
-  const signedUrls = await service.uploadPicturesToPost(userId, post_id, Number(amount))
+  // const signedUrls = await service.uploadPicturesToPost(userId, post_id, Number(amount))
 
-  return res.status(HttpStatus.OK).json({ urls: signedUrls })
+  // return res.status(HttpStatus.OK).json({ urls: signedUrls })
 })

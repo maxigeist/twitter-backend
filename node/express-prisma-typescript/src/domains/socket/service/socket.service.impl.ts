@@ -4,10 +4,10 @@ import { SocketService } from '@domains/socket/service/socket.service'
 import { SocketRepository } from '@domains/socket/repository'
 import { ConversationService, ConversationServiceImpl } from '@domains/conversation/service'
 import { ConversationRepositoryImpl } from '@domains/conversation/repository/conversation.repository.impl'
+import { ConversationViewDTO } from '@domains/conversation/dto'
 
 export class SocketServiceImpl implements SocketService {
-  constructor (private readonly messageRepository: SocketRepository) {
-  }
+  constructor (private readonly messageRepository: SocketRepository) {}
 
   conversationService: ConversationService = new ConversationServiceImpl(new ConversationRepositoryImpl(db))
 
@@ -16,5 +16,9 @@ export class SocketServiceImpl implements SocketService {
       throw new ForbiddenException()
     }
     return await this.messageRepository.createMessage(userId, message)
+  }
+
+  async getConversations (userId: string): Promise<ConversationViewDTO[]> {
+    return await this.conversationService.getAllConversations(userId)
   }
 }

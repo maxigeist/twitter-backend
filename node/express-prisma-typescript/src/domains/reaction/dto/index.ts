@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator'
 export class ReactionDto {
   @IsString()
   @IsNotEmpty()
-    reactionType!: string
+    type!: string
 }
 
 export class ExtendedReactionDto {
@@ -13,6 +13,7 @@ export class ExtendedReactionDto {
     this.postId = reaction.postId
     this.createdAt = reaction.createdAt
     this.id = reaction.id
+    this.type = reaction.type
   }
 
   userId: string
@@ -20,4 +21,5 @@ export class ExtendedReactionDto {
   postId: string
   createdAt: Date
   id: string
+  type: string
 }
