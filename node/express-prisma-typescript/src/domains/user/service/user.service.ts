@@ -9,4 +9,5 @@ export interface UserService {
   userHasPrivateAccount: (userId: string) => Promise<boolean>
   changeVisibility: (userId: string) => Promise<void>
   saveProfilePicture: (userId: string) => Promise<string>
+  getFollowedUsers: (userId: string) => Promise<UserViewDTO[]>
 }

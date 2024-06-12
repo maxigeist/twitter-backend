@@ -21,4 +21,8 @@ export class SocketServiceImpl implements SocketService {
   async getConversations (userId: string): Promise<ConversationViewDTO[]> {
     return await this.conversationService.getAllConversations(userId)
   }
+
+  async getConversationMembersIds (conversationId: string): Promise<string[]> {
+    return await this.conversationService.getConversationMembersIds(conversationId)
+  }
 }

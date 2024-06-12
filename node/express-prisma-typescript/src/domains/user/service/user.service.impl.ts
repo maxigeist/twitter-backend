@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@utils/errors'
+import { NotFoundException } from '@utils/errors'
 import { CursorPagination, OffsetPagination } from 'types'
 import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
@@ -61,5 +61,10 @@ export class UserServiceImpl implements UserService {
     } else {
       await this.repository.changeVisibility(userId, 'private')
     }
+  }
+
+  async getFollowedUsers (userId: string): Promise<UserViewDTO[]> {
+    console.log('hola')
+    return await this.repository.getFollowedUsers(userId)
   }
 }

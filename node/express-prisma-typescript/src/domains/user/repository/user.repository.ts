@@ -13,4 +13,5 @@ export interface UserRepository {
   getUserById: (userId: string) => Promise<UserViewDTO | null>
   changeVisibility: (userId: string, type: string) => Promise<void>
   savePicture: (userId: string, imageName: string) => Promise<void>
+  getFollowedUsers: (userId: string) => Promise<UserViewDTO[]>
 }

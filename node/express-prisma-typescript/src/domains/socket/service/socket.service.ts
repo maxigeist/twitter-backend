@@ -4,4 +4,5 @@ import { ConversationViewDTO } from '@domains/conversation/dto'
 export interface SocketService {
   createMessage: (userId: string, message: CreateMessageInputDTO) => Promise<MessageDTO>
   getConversations: (userId: string) => Promise<ConversationViewDTO[]>
+  getConversationMembersIds: (conversationId: string) => Promise<string[]>
 }

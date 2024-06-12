@@ -93,6 +93,9 @@ export class PostRepositoryImpl implements PostRepository {
           }
         },
         author: true
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     })
     return posts

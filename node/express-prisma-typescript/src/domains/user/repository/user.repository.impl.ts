@@ -53,7 +53,6 @@ export class UserRepositoryImpl implements UserRepository {
           }
         }
       }
-
     })
     return user
       ? new UserProfileDTO({
@@ -62,8 +61,24 @@ export class UserRepositoryImpl implements UserRepository {
         username: user.username,
         profilePicture: user.profilePicture,
         private: user.profileVisibility?.type.type === 'private',
-        followers: user.followers.filter((follow) => follow.follower.id === userId || userId === otherUserId).map((follow) => new UserWithAccountTypeDTO({ ...follow.follower, private: user.profileVisibility?.type.type === 'private' })),
-        following: user.follows.filter((follow) => follow.followed.id === userId || userId === otherUserId).map((follow) => new UserWithAccountTypeDTO({ ...follow.followed, private: user.profileVisibility?.type.type === 'private' }))
+        followers: user.followers
+          .filter((follow) => follow.follower.id === userId || userId === otherUserId)
+          .map(
+            (follow) =>
+              new UserWithAccountTypeDTO({
+                ...follow.follower,
+                private: user.profileVisibility?.type.type === 'private'
+              })
+          ),
+        following: user.follows
+          .filter((follow) => follow.followed.id === userId || userId === otherUserId)
+          .map(
+            (follow) =>
+              new UserWithAccountTypeDTO({
+                ...follow.followed,
+                private: user.profileVisibility?.type.type === 'private'
+              })
+          )
       })
       : null
   }
@@ -175,5 +190,17 @@ export class UserRepositoryImpl implements UserRepository {
         profilePicture: imageName
       }
     })
+  }
+
+  async getFollowedUsers (userId: string): Promise<UserViewDTO[]> {
+    const users = await this.db.follow.findMany({
+      where: {
+        followerId: userId
+      },
+      include: {
+        followed: true
+      }
+    })
+    return users.map((user) => new UserViewDTO(user.followed))
   }
 }

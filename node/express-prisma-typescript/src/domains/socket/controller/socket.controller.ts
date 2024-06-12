@@ -9,10 +9,12 @@ const service: SocketService = new SocketServiceImpl(new SocketRepositoryImpl(db
 
 export class SocketController {
   constructor (private readonly io: Server) {
+    const userSocketMap: any = {}
     this.io.on('connection', async (socket) => {
       try {
         socketAuth(socket)
         const { userId } = socket.handshake.auth.userId
+        userSocketMap[userId] = socket.id
         const conversations = await service.getConversations(userId)
         socket.emit('new-connection', conversations)
       } catch (error) {
@@ -23,9 +25,16 @@ export class SocketController {
         const { content, conversationId } = msg
         try {
           const message = await service.createMessage(userId, { content, conversationId })
-          socket.broadcast.to(conversationId).emit('receive message', message)
+          this.io.to(conversationId).emit('receive message', message)
+          const usersInConversation = await service.getConversationMembersIds(conversationId)
+          for (const user of usersInConversation) {
+            const userSocketId = userSocketMap[user]
+            if (userSocketId) {
+              const updatedConversations = await service.getConversations(user)
+              this.io.to(userSocketId).emit('new-connection', updatedConversations)
+            }
+          }
         } catch (error) {
-          console.log(error)
           socket.disconnect()
         }
       })

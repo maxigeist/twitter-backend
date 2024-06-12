@@ -64,3 +64,9 @@ userRouter.get('/upload/image', async (req: Request, res: Response) => {
   const url = await service.saveProfilePicture(userId)
   return res.status(HttpStatus.OK).json({ url })
 })
+
+userRouter.get('/follow/followed', async (req: Request, res: Response) => {
+  const { userId } = res.locals.context
+  const users = await service.getFollowedUsers(userId)
+  return res.status(HttpStatus.OK).json(users)
+})

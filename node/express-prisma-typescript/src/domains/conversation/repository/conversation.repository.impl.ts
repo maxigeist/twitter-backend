@@ -26,11 +26,12 @@ export class ConversationRepositoryImpl implements ConversationRepository {
     return new ConversationDTO({
       id: conversation.id,
       name: conversation.name,
+      messages: [],
       members: conversation.UserConversation.map((uc) => new UserViewDTO(uc.user))
     })
   }
 
-  async getAllMessagesFromConversation (conversationId: string): Promise<MessageDTO[]> {
+  async getConversation (conversationId: string, userId: string): Promise<ConversationDTO> {
     const userConversation = await this.db.userConversation.findFirst({
       where: {
         conversationId
@@ -52,12 +53,28 @@ export class ConversationRepositoryImpl implements ConversationRepository {
               orderBy: {
                 createdAt: 'desc'
               }
+            },
+            UserConversation: {
+              include: {
+                user: true
+              }
             }
           }
         }
       }
     })
-    return userConversation ? userConversation.conversation.messages.map((message) => new MessageDTO(message)) : []
+    return userConversation
+      ? new ConversationDTO(
+        {
+          id: userConversation.conversation.id,
+          name: Number(userConversation.conversation.UserConversation.length) > 2
+            ? userConversation.conversation.name
+            : userConversation.conversation.UserConversation.find((uc) => uc.userId !== userId)?.user.username ?? '',
+          members: userConversation.conversation.UserConversation.map((uc) => new UserViewDTO(uc.user)),
+          messages: userConversation.conversation.messages.map((message) => new MessageDTO(message))
+        }
+      )
+      : new ConversationDTO({ id: '', name: '', members: [], messages: [] })
   }
 
   async getAllConversations (userId: string): Promise<ConversationViewDTO[]> {
@@ -83,6 +100,16 @@ export class ConversationRepositoryImpl implements ConversationRepository {
                   }
                 }
               }
+            },
+            UserConversation: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true
+                  }
+                }
+              }
             }
           }
         }
@@ -93,7 +120,10 @@ export class ConversationRepositoryImpl implements ConversationRepository {
       const conversation = userConversation.conversation
       return new ConversationViewDTO({
         id: conversation.id,
-        name: conversation.name,
+        name:
+          Number(conversation.UserConversation.length) > 2
+            ? conversation.name
+            : conversation.UserConversation.find((uc) => uc.userId !== userId)?.user.username ?? '',
         picture: conversation.picture ? conversation.picture : null,
         lastMessage: conversation.messages.length > 0 ? new MessageDTO(conversation.messages[0]) : null
       })
@@ -123,5 +153,14 @@ export class ConversationRepositoryImpl implements ConversationRepository {
       }
     })
     return Boolean(conversation)
+  }
+
+  async getConversationMembersIds (conversationId: string): Promise<string[]> {
+    const userConversations = await this.db.userConversation.findMany({
+      where: {
+        conversationId
+      }
+    })
+    return userConversations.map((uc) => uc.userId)
   }
 }

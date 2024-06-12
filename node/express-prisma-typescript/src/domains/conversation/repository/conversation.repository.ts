@@ -1,16 +1,17 @@
 import { ConversationDTO, ConversationViewDTO } from '@domains/conversation/dto'
-import { MessageDTO } from '@domains/message/dto'
 
 export interface ConversationRepository {
 
   getAllConversations: (userId: string) => Promise<ConversationViewDTO[]>
 
-  getAllMessagesFromConversation: (conversationId: string) => Promise<MessageDTO[]>
+  getConversation: (conversationId: string, userId: string) => Promise<ConversationDTO>
 
   userIsMemberOfConversation: (userId: string, conversationId: string) => Promise<boolean>
 
   createConversation: (conversationName: string, receivers: string[]) => Promise<ConversationDTO>
 
   getConversationByReceiverIds: (receiverIds: string[]) => Promise<boolean>
+
+  getConversationMembersIds: (conversationId: string) => Promise<string[]>
 
 }
