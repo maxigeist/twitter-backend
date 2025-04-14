@@ -1,11 +1,11 @@
 import { IsArray, IsNotEmpty, IsString } from 'class-validator'
 import { MessageDTO } from '@domains/message/dto'
 import { UserViewDTO } from '@domains/user/dto'
+import { Message } from '@prisma/client'
 
 export class CreateConversationInputDTO {
   @IsString()
-  @IsNotEmpty()
-    conversationName!: string
+    conversationName?: string
 
   @IsArray()
   @IsNotEmpty()
@@ -16,11 +16,13 @@ export class ConversationDTO {
   constructor (conversation: ConversationDTO) {
     this.id = conversation.id
     this.name = conversation.name
+    this.messages = conversation.messages
     this.members = conversation.members
   }
 
   id: string
   name: string
+  messages: MessageDTO[]
   members: UserViewDTO[]
 }
 

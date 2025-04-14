@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@utils/errors'
+import { NotFoundException } from '@utils/errors'
 import { CursorPagination, OffsetPagination } from 'types'
 import { UserViewDTO } from '../dto'
 import { UserRepository } from '../repository'
@@ -16,18 +16,14 @@ export class UserServiceImpl implements UserService {
 
   async getUser (userId: string, otherUserId: any): Promise<UserViewDTO> {
     uuidValidator(otherUserId)
-    const user = await this.repository.getById(otherUserId)
+    const user = await this.repository.getById(userId, otherUserId)
     if (user) {
-      if (!await this.userHasPrivateAccount(otherUserId) || await this.followService.userFollows(userId, otherUserId)) {
-        return user
-      }
-      throw new ForbiddenException()
+      return user
     }
     throw new NotFoundException('user')
   }
 
   async getUserRecommendations (userId: any, options: OffsetPagination): Promise<UserViewDTO[]> {
-    // TODO: make this return only users followed by users the original user follows
     const usersFollowedId = await this.followService.getUserFollowedId(userId)
     const userFollowedFollowedId: string[] = []
     for (const userFollowedId of usersFollowedId) {
@@ -53,14 +49,6 @@ export class UserServiceImpl implements UserService {
     return await this.repository.userHasPrivateAccount(userId)
   }
 
-  async getUserById (userId: string): Promise<UserViewDTO> {
-    const user = await this.repository.getById(userId)
-    if (user) {
-      return user
-    }
-    throw new NotFoundException('user')
-  }
-
   async saveProfilePicture (userId: string): Promise<string> {
     const url = await getSignedUrlAux(userId + '-profile-picture')
     await this.repository.savePicture(userId, userId + '-profile-picture')
@@ -73,5 +61,10 @@ export class UserServiceImpl implements UserService {
     } else {
       await this.repository.changeVisibility(userId, 'private')
     }
+  }
+
+  async getFollowedUsers (userId: string): Promise<UserViewDTO[]> {
+    console.log('hola')
+    return await this.repository.getFollowedUsers(userId)
   }
 }

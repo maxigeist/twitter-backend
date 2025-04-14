@@ -9,18 +9,31 @@ const service: SocketService = new SocketServiceImpl(new SocketRepositoryImpl(db
 
 export class SocketController {
   constructor (private readonly io: Server) {
-    this.io.on('connection', (socket) => {
+    const userSocketMap: any = {}
+    this.io.on('connection', async (socket) => {
       try {
         socketAuth(socket)
+        const { userId } = socket.handshake.auth.userId
+        userSocketMap[userId] = socket.id
+        const conversations = await service.getConversations(userId)
+        socket.emit('new-connection', conversations)
       } catch (error) {
         socket.disconnect()
       }
       socket.on('send message', async (msg) => {
-        const { content, conversationId } = msg
         const { userId } = socket.handshake.auth.userId
+        const { content, conversationId } = msg
         try {
-          const messageAux = await service.createMessage(userId, { content, conversationId })
-          socket.broadcast.to(conversationId).emit('receive message', messageAux.content)
+          const message = await service.createMessage(userId, { content, conversationId })
+          this.io.to(conversationId).emit('receive message', message)
+          const usersInConversation = await service.getConversationMembersIds(conversationId)
+          for (const user of usersInConversation) {
+            const userSocketId = userSocketMap[user]
+            if (userSocketId) {
+              const updatedConversations = await service.getConversations(user)
+              this.io.to(userSocketId).emit('new-connection', updatedConversations)
+            }
+          }
         } catch (error) {
           socket.disconnect()
         }
@@ -36,8 +49,7 @@ export class SocketController {
         await socket.leave(conversationId)
       })
 
-      socket.on('disconnect', () => {
-      })
+      socket.on('disconnect', () => {})
     })
   }
 }

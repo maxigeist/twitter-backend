@@ -23,7 +23,6 @@ export class FollowServiceImpl implements FollowService {
       }
       throw new ValidationException([{ message: "A user can't follow himself" }])
     }
-    await this.deleteFollow(followerId, followedId)
     return extendedFollow
   }
 

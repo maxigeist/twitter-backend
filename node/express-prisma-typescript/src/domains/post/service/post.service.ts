@@ -7,9 +7,10 @@ export interface PostService {
   createComment: (userId: string, body: CreateCommentInputDTO, postId: string) => Promise<CommentDTO>
   deletePost: (userId: string, postId: string) => Promise<void>
   getPost: (userId: string, postId: string) => Promise<PostDTO>
-  getLatestPosts: (userId: string, options: { limit?: number, before?: string, after?: string }) => Promise<PostDTO[]>
+  getLatestPosts: (userId: string, options: { limit?: number, before?: string, after?: string }) => Promise<ExtendedPostDTO[]>
   getPostsByAuthor: (userId: any, authorId: string) => Promise<ExtendedPostDTO[]>
   getCommentsByUser: (userId: string, authorId: string) => Promise<CommentDTO[]>
   getCommentsByPost: (userId: string, options: CursorPagination, postId: string) => Promise <ExtendedPostDTO[]>
-  uploadPicturesToPost: (userId: string, postId: string, images: number) => Promise<string[]>
+  getPreSignedUrls: (images: string[]) => Promise<string[]>
+  getPostsFromFollowed: (userId: string, options: CursorPagination) => Promise<ExtendedPostDTO[]>
 }

@@ -38,10 +38,16 @@ app.listen(Constants.PORT, () => {
   Logger.info(`Server listening on port ${Constants.PORT}`)
 })
 
-const socketServer = app.listen(3000, () => {
-  console.log('Socket server running at http://localhost:3000')
+const socketServer = app.listen(3001, () => {
+  console.log('Socket server running at http://localhost:3001')
 })
 
-const io = new Server(socketServer)
+// const io = new Server(socketServer)
 
-const socketController = new SocketController(io)
+const socketController = new SocketController(
+  new Server(socketServer, {
+    cors: {
+      origin: 'http://localhost:3000'
+    }
+  })
+)

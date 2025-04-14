@@ -20,7 +20,7 @@ conversationRouter.get('/', async (req: Request, res: Response) => {
 conversationRouter.get('/:conversation_id', async (req: Request, res: Response) => {
   const { userId } = res.locals.context
   const { conversation_id } = req.params
-  const messages = await service.getAllMessagesFromConversation(userId, conversation_id)
+  const messages = await service.getConversation(userId, conversation_id)
   return res.status(HttpStatus.OK).json(messages)
 })
 

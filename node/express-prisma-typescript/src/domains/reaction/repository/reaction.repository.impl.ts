@@ -1,5 +1,5 @@
 import { ReactionRepository } from '@domains/reaction/repository/reaction.repository'
-import { ExtendedReactionDto, ReactionDto } from '@domains/reaction/dto'
+import { ExtendedReactionDto } from '@domains/reaction/dto'
 import { PrismaClient } from '@prisma/client'
 
 export class ReactionRepositoryImpl implements ReactionRepository {
@@ -11,9 +11,16 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         userId,
         postId,
         reactionTypeId
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
       }
     })
-    return new ExtendedReactionDto(reaction)
+    return new ExtendedReactionDto({ ...reaction, type: reaction.type.type })
   }
 
   async delete (reactionId: string): Promise<void> {
@@ -28,9 +35,16 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     const reaction = await this.db.reaction.findUnique({
       where: {
         id: reactionId
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
       }
     })
-    return reaction ? new ExtendedReactionDto(reaction) : null
+    return reaction ? new ExtendedReactionDto({ ...reaction, type: reaction.type.type }) : null
   }
 
   async getReactionTypeId (type: string): Promise<string | null> {
@@ -42,15 +56,26 @@ export class ReactionRepositoryImpl implements ReactionRepository {
     return reactionTypeId ? reactionTypeId.id : null
   }
 
-  async checkIfReactionExists (userId: string, reactionTypeId: string, postId: string): Promise<ExtendedReactionDto | null> {
+  async checkIfReactionExists (
+    userId: string,
+    reactionTypeId: string,
+    postId: string
+  ): Promise<ExtendedReactionDto | null> {
     const reactions = await this.db.reaction.findMany({
       where: {
         userId,
         reactionTypeId,
         postId
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
       }
     })
-    return (reactions.length > 0) ? new ExtendedReactionDto(reactions[0]) : null
+    return reactions.length > 0 ? new ExtendedReactionDto({ ...reactions[0], type: reactions[0].type.type }) : null
   }
 
   async getLikesFromUser (userId: string): Promise<ExtendedReactionDto[]> {
@@ -60,9 +85,16 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         type: {
           type: 'like'
         }
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
       }
     })
-    return likes.map((like) => new ExtendedReactionDto(like))
+    return likes.map((like) => new ExtendedReactionDto({ ...like, type: like.type.type }))
   }
 
   async getRetweetsFromUser (userId: string): Promise<ExtendedReactionDto[]> {
@@ -72,8 +104,15 @@ export class ReactionRepositoryImpl implements ReactionRepository {
         type: {
           type: 'retweet'
         }
+      },
+      include: {
+        type: {
+          select: {
+            type: true
+          }
+        }
       }
     })
-    return retweets.map((retweet) => new ExtendedReactionDto(retweet))
+    return retweets.map((retweet) => new ExtendedReactionDto({ ...retweet, type: retweet.type.type }))
   }
 }

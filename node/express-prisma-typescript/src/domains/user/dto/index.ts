@@ -35,3 +35,39 @@ export class UserViewDTO {
   username: string
   profilePicture: string | null
 }
+
+export class UserWithAccountTypeDTO {
+  constructor (user: UserWithAccountTypeDTO) {
+    this.id = user.id
+    this.name = user.name
+    this.username = user.username
+    this.profilePicture = user.profilePicture
+    this.private = user.private
+  }
+
+  id: string
+  name: string | null
+  username: string
+  profilePicture: string | null
+  private: boolean
+}
+
+export class UserProfileDTO {
+  constructor (user: UserProfileDTO) {
+    this.id = user.id
+    this.name = user.name
+    this.username = user.username
+    this.profilePicture = user.profilePicture
+    this.private = user.private
+    this.followers = user.followers
+    this.following = user.following
+  }
+
+  id: string
+  name: string | null
+  username: string
+  profilePicture: string | null
+  private: boolean
+  followers: UserWithAccountTypeDTO[]
+  following: UserWithAccountTypeDTO[]
+}
